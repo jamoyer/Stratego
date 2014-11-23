@@ -15,21 +15,14 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/GameControl")
 public class GameControl extends HttpServlet
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -6710062789707387995L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
     public GameControl()
     {
         super();
         // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-     *      response)
-     */
     @Override
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException
@@ -38,15 +31,10 @@ public class GameControl extends HttpServlet
         output.write("Hello, World from Jacob!");
     }
 
-    /**
-     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-     *      response)
-     */
     @Override
     protected void doPost(HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException
     {
         // TODO Auto-generated method stub
     }
-
 }
