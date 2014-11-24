@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils;"%>
 <%
     String sessionUser = (String) session.getAttribute("user");
     // Users must login before viewing the home page
@@ -13,6 +14,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="/Stratego/js/jquery-2.1.1.min.js"></script>
+<script src="/Stratego/js/home.js"></script>
 <title>Stratego - Home</title>
 </head>
 <body>
@@ -20,16 +23,19 @@
     <h3>
         Logged in as
         <%
-        out.print(sessionUser);
+        out.print(StringEscapeUtils.escapeHtml4(sessionUser));
     %>
     </h3>
-    <form action="/Stratego/Validator" method="post">
-        <input type="hidden" name="actionType" value="logout"></input>
-        <br> <br>
-        <input type="submit" value="Logout"></input>
-    </form>
-    
-    
+    <div>
+        <form action="/Stratego/Validator" method="post">
+            <input type="hidden" name="actionType" value="logout"></input>
+            <br> <br>
+            <input type="submit" value="Logout"></input>
+        </form>
+    </div>
+    <div>
+        <button onclick="joinNewGame">New Game</button>
+    </div>
 </body>
 </html>
 <%

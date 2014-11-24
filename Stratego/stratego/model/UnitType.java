@@ -10,31 +10,31 @@ package stratego.model;
  */
 public enum UnitType
 {
-    FLAG('F', -1, 1),
-    BOMB('B', -1, 6),
-    SPY('S', -1, 1),
-    SCOUT('9', 9, 8),
-    MINER('8', 8, 5),
-    SERGEANT('7', 7, 4),
-    LIEUTENANT('6', 6, 4),
-    CAPTAIN('5', 5, 4),
-    MAJOR('4', 4, 3),
-    COLONEL('3', 3, 2),
-    GENERAL('2', 2, 1),
-    MARSHALL('1', 1, 1);
+    FLAG(TileSymbols.FLAG, -1, 1),
+    BOMB(TileSymbols.BOMB, -1, 6),
+    SPY(TileSymbols.SPY, -1, 1),
+    SCOUT(TileSymbols.SCOUT, 9, 8),
+    MINER(TileSymbols.MINER, 8, 5),
+    SERGEANT(TileSymbols.SERGEANT, 7, 4),
+    LIEUTENANT(TileSymbols.LIEUTENANT, 6, 4),
+    CAPTAIN(TileSymbols.CAPTAIN, 5, 4),
+    MAJOR(TileSymbols.MAJOR, 4, 3),
+    COLONEL(TileSymbols.COLONEL, 3, 2),
+    GENERAL(TileSymbols.GENERAL, 2, 1),
+    MARSHALL(TileSymbols.MARSHALL, 1, 1);
 
-    private final char symbol;
+    private final TileSymbols symbol;
     private final int numUnits;
     private final int rank;
 
-    private UnitType(final char symbol, final int rank, final int numUnits)
+    private UnitType(final TileSymbols symbol, final int rank, final int numUnits)
     {
         this.symbol = symbol;
         this.numUnits = numUnits;
         this.rank = rank;
     }
 
-    public char getSymbol()
+    public TileSymbols getSymbol()
     {
         return this.symbol;
     }
