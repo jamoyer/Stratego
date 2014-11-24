@@ -24,7 +24,7 @@ public class Validator extends HttpServlet
     private static final String DRIVER = "com.mysql.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/stratego";
     private static final String USER = "root";
-    private static final String PASS = "12323434qwewerer";
+    private static final String PASS = "rootpw";
 
     private static final String ERROR_MESSAGE = "ERROR: ";
     private static final String SUCCESS_MESSAGE = "SUCCESS: ";
