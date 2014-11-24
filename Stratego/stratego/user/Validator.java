@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 public class Validator extends HttpServlet
 {
     private static final long serialVersionUID = 1L;
+
     private static final String DRIVER = "com.mysql.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/stratego";
     private static final String USER = "root";
@@ -28,6 +29,11 @@ public class Validator extends HttpServlet
 
     private static final String ERROR_MESSAGE = "ERROR: ";
     private static final String SUCCESS_MESSAGE = "SUCCESS: ";
+
+    /*
+     * Methods should put information in here for the client.
+     */
+    private String _responseMessage;
 
     public Validator()
     {
@@ -41,46 +47,78 @@ public class Validator extends HttpServlet
         PrintWriter output = response.getWriter();
 
         // check that actionType is set
-        String actionType = request.getParameter("actionType");
-        if (actionType == null || actionType.isEmpty())
+        final String actionType = request.getParameter("actionType");
+        if (emptyString(actionType))
         {
             output.write(ERROR_MESSAGE + "No Action Type.");
             return;
         }
 
+        final String username = request.getParameter("username");
+        final String password = request.getParameter("password");
+
         // get a response based on the actiontype
-        String responseMessage = null;
+        _responseMessage = null;
+        boolean isSuccessful = false;
         switch (actionType)
         {
             case "login":
-                responseMessage = doLogin(request.getParameter("username"),
-                        request.getParameter("password"));
+                isSuccessful = validateUser(username, password);
+                if (isSuccessful)
+                {
+                    request.getSession().setAttribute("user", username);
+                }
                 break;
             case "signup":
-                responseMessage = doSignup(request.getParameter("username"),
-                        request.getParameter("password"));
+                isSuccessful = createUser(username, password);
+                if (isSuccessful)
+                {
+                    request.getSession().setAttribute("user", username);
+                }
                 break;
+            case "logout":
+                request.getSession().setAttribute("user", null);
+                isSuccessful = true;
+                _responseMessage = "Logged out.";
             default:
-                responseMessage = ERROR_MESSAGE + "Invalid Action Type.";
+                _responseMessage = "Invalid Action Type.";
         }
 
         // send the response back to the client
-        output.write(responseMessage);
+        if (isSuccessful)
+        {
+            _responseMessage = SUCCESS_MESSAGE + _responseMessage;
+        }
+        else
+        {
+            _responseMessage = ERROR_MESSAGE + _responseMessage;
+        }
+        System.out.println(_responseMessage);
+        response.sendRedirect("/Stratego/home.jsp");
     }
 
-    private static String doLogin(final String username, final String password)
+    /**
+     * Given a username and password, checks if the user exists and the password
+     * is correct.
+     * 
+     * @param username
+     * @param password
+     * @return true for success and false for failure of logging in.
+     */
+    private boolean validateUser(final String username, final String password)
     {
-        if (username == null || username.isEmpty())
+        if (emptyString(username))
         {
-            return ERROR_MESSAGE + "No Username.";
+            _responseMessage = "Username not set.";
+            return false;
+        }
+        if (emptyString(password))
+        {
+            _responseMessage = "Password not set.";
+            return false;
         }
 
-        if (password == null || password.isEmpty())
-        {
-            return ERROR_MESSAGE + "No Username.";
-        }
-
-        String message = null;
+        boolean isSuccessful = false;
         Connection conn = null;
         PreparedStatement stmt = null;
         try
@@ -92,6 +130,8 @@ public class Validator extends HttpServlet
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
             // STEP 4: Execute a prepared query
+            // prepared statements are better than escaping strings and
+            // guarantee there is no sql injection
             String sql = "SELECT user FROM users WHERE user=? AND password=?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
@@ -102,11 +142,13 @@ public class Validator extends HttpServlet
             // STEP 5: Extract data from result set
             if (rs.next() && username.equals(rs.getString("user")))
             {
-                message = SUCCESS_MESSAGE + "Access Granted.";
+                _responseMessage = "Access Granted.";
+                isSuccessful = true;
             }
             else
             {
-                message = ERROR_MESSAGE + "Access Denied.";
+                _responseMessage = "Access Denied.";
+                isSuccessful = false;
             }
 
             // STEP 6: Clean-up environment
@@ -136,7 +178,7 @@ public class Validator extends HttpServlet
             }
             catch (SQLException se2)
             {
-            }// nothing we can do
+            }
             try
             {
                 if (conn != null)
@@ -149,11 +191,28 @@ public class Validator extends HttpServlet
                 se.printStackTrace();
             }
         }
-        return message;
+        return isSuccessful;
     }
 
-    private static String doSignup(final String username, final String password)
+    private boolean createUser(final String username, final String password)
     {
-        return null;
+        if (emptyString(username))
+        {
+            _responseMessage = "Username not set.";
+            return false;
+        }
+        if (emptyString(password))
+        {
+            _responseMessage = "Password not set.";
+            return false;
+        }
+
+        _responseMessage = "Action unimplemented at this time.";
+        return false;
+    }
+
+    private boolean emptyString(final String string)
+    {
+        return string == null || string.isEmpty();
     }
 }
