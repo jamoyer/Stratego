@@ -4,6 +4,7 @@ public class Field
 {
     private static final int ROWS = 10;
     private static final int COLUMNS = 10;
+    private static final int STARTING_PLAYER_ROWS = 4;
 
     private final Tile[][] grid;
 
@@ -19,8 +20,7 @@ public class Field
                 Position pos = new Position(i, j);
 
                 // make obstacles for stratego field
-                if ((i == 4 || i == 5)
-                        && (j == 2 || j == 3 || j == 6 || j == 7))
+                if ((i == 4 || i == 5) && (j == 2 || j == 3 || j == 6 || j == 7))
                 {
                     this.grid[i][j] = new Tile(pos, true);
                 }
@@ -50,5 +50,20 @@ public class Field
     public void setUnitAt(final Position pos, final Unit unit)
     {
         this.getTileAt(pos).setUnit(unit);
+    }
+
+    public static int getRowCount()
+    {
+        return ROWS;
+    }
+
+    public static int getColumnCount()
+    {
+        return COLUMNS;
+    }
+
+    public static int getStartingPlayerRowCount()
+    {
+        return STARTING_PLAYER_ROWS;
     }
 }

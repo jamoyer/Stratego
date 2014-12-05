@@ -34,7 +34,12 @@
         </form>
     </div>
     <div>
-        <button onclick="joinNewGame">New Game</button>
+        <button onclick="joinNewGame()">New Game</button>
+        <button onclick="setStartPositions()">Set Start Positions</button>
+    </div>
+    <div>
+        <h4>Server Response</h4>
+        <p id="serverResponse"></p>
     </div>
 </body>
 </html>

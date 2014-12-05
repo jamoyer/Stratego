@@ -14,6 +14,7 @@ function joinNewGame()
         dataType : 'json',
         success : function(data)
         {
+            $("#serverResponse").text(JSON.stringify(data));
             if (!data.isSuccessful)
             {
                 // could not join game
@@ -38,6 +39,61 @@ function joinNewGame()
     });
 }
 
+/**
+ * This function is for getting the current status of a game so that it may be continued. This is
+ * useful if the user had their session ended but the game is still going and they wish to join it
+ * again.
+ */
+function getCurrentGame()
+{
+    $.ajax(
+    {
+        url : "/Stratego/GameControl",
+        type : "POST",
+        dataType : "json",
+        data :
+        {
+            actionType : "getCurrentGame"
+        },
+        success : function(data)
+        {
+            // if no game exists for this user it will return not successful
+            if (!data.isSuccessful)
+            {
+                // could not start game with these positions
+                // error message will be stored in errorMsg
+                // do something with it
+
+                var errorMsg = data.errorMsg;
+                alert(errorMsg);
+                return;
+            }
+
+            // true if the user attempted to join a game and was still waiting
+            if (data.waitingToJoin)
+            {
+                // do stuff
+            }
+            // true if the user joined a game and needed to set starting positions
+            if (data.settingPositions)
+            {
+                // do stuff
+            }
+            // true if the user joined a game and the game was in progress
+            if (data.inGame)
+            {
+                // do stuff
+            }
+
+            // the 10x10 field will be stored in data.field.
+            // This will consist of a double array of characters, each corresponding some unit or
+            // tile to display, the mapping is defined in home.jsp
+            var field = data.field;
+            drawField(field);
+        }
+    });
+}
+
 /*
  * Sends the user's chosen starting positions to the GameControl. GameControl returns the inital
  * 10x10 field to display.
@@ -56,10 +112,12 @@ function setStartPositions()
         dataType : "json",
         data :
         {
-            positions : startingPositions
+            actionType : "setPositions",
+            positions : JSON.stringify(startingPositions)
         },
         success : function(data)
         {
+            $("#serverResponse").text(JSON.stringify(data));
             if (!data.isSuccessful)
             {
                 // could not start game with these positions
@@ -100,6 +158,7 @@ function moveUnit(source, destination)
         type : "POST",
         data :
         {
+            actionType : "moveUnit",
             source : source,
             destination : destination
         }
@@ -159,6 +218,42 @@ function moveUnit(source, destination)
             }
         }
     };
+}
+
+function quitGame()
+{
+    // need to manually handle readystatechange because there is
+    // no way to do it in pure jquery apparently
+    var xmlReq = $.ajax(
+    {
+        url : "/Stratego/GameControl",
+        type : "POST",
+        data :
+        {
+            actionType : "quitGame"
+        },
+        success : function(data)
+        {
+            if (!data.isSuccessful)
+            {
+                // could not start game with these positions
+                // error message will be stored in errorMsg
+                // do something with it
+
+                var errorMsg = data.errorMsg;
+                alert(errorMsg);
+                return;
+            }
+
+            // do stuff for a lost game
+
+            // the 10x10 field will be stored in data.field.
+            // This will consist of a double array of characters, each corresponding some unit or
+            // tile to display, the mapping is defined in home.jsp
+            var field = data.field;
+            drawField(field);
+        }
+    });
 }
 
 /*

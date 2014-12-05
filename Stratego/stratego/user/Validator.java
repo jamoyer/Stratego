@@ -80,6 +80,7 @@ public class Validator extends HttpServlet
                 request.getSession().setAttribute("user", null);
                 isSuccessful = true;
                 _responseMessage = "Logged out.";
+                break;
             default:
                 _responseMessage = "Invalid Action Type.";
         }
@@ -211,8 +212,13 @@ public class Validator extends HttpServlet
         return false;
     }
 
-    private boolean emptyString(final String string)
+    public static boolean emptyString(final String string)
     {
         return string == null || string.isEmpty();
+    }
+
+    public static long currentTimeSeconds()
+    {
+        return System.currentTimeMillis() / 1000;
     }
 }
