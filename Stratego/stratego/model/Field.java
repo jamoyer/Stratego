@@ -5,6 +5,7 @@ public class Field
     private static final int ROWS = 10;
     private static final int COLUMNS = 10;
     private static final int STARTING_PLAYER_ROWS = 4;
+    private static final int BOTTOM_PLAYER_ROW_OFFSET = 6;
 
     private final Tile[][] grid;
 
@@ -65,5 +66,10 @@ public class Field
     public static int getStartingPlayerRowCount()
     {
         return STARTING_PLAYER_ROWS;
+    }
+
+    public static int getBottomPlayerRowOffset()
+    {
+        return BOTTOM_PLAYER_ROW_OFFSET;
     }
 }

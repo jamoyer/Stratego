@@ -21,6 +21,7 @@ public class ResponseMessage
     private char[][] field = null;
     private boolean gameWon = false;
     private boolean gameLost = false;
+    private PlayerPosition turn = null;
 
     public ResponseMessage()
     {
@@ -49,12 +50,30 @@ public class ResponseMessage
             message.put("field", field);
             message.put("gameWon", gameWon);
             message.put("gameLost", gameLost);
+            if (turn != null)
+            {
+                message.put("currentTurn", turn.getPlayerNumber());
+            }
+            else
+            {
+                message.put("currentTurn", 0);
+            }
         }
         catch (JSONException e)
         {
             e.printStackTrace();
         }
         return message.toString();
+    }
+
+    /**
+     * Which player's turn it currently is.
+     * 
+     * @param turn
+     */
+    public void setTurn(PlayerPosition turn)
+    {
+        this.turn = turn;
     }
 
     /**

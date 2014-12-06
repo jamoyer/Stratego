@@ -3,95 +3,11 @@
  */
 function joinNewGame()
 {
-    $.ajax(
+    var data =
     {
-        url : "/Stratego/GameControl",
-        type : "POST",
-        data :
-        {
-            actionType : "newGame"
-        },
-        dataType : 'json',
-        success : function(data)
-        {
-            $("#serverResponse").text(JSON.stringify(data));
-            if (!data.isSuccessful)
-            {
-                // could not join game
-                // error message will be stored in errorMsg
-                // do something with it
-
-                var errorMsg = data.errorMsg;
-                alert(errorMsg);
-                return;
-            }
-
-            /*
-             * player will either be 1 or 2. Player 1 = bottom, player 2 = top.
-             */
-            var playerNum = data.playerNum;
-
-            // opponent's username, display this somewhere
-            var opponent = data.opponent;
-
-            // allow the user to choose starting positions, etc ...
-        }
-    });
-}
-
-/**
- * This function is for getting the current status of a game so that it may be continued. This is
- * useful if the user had their session ended but the game is still going and they wish to join it
- * again.
- */
-function getCurrentGame()
-{
-    $.ajax(
-    {
-        url : "/Stratego/GameControl",
-        type : "POST",
-        dataType : "json",
-        data :
-        {
-            actionType : "getCurrentGame"
-        },
-        success : function(data)
-        {
-            // if no game exists for this user it will return not successful
-            if (!data.isSuccessful)
-            {
-                // could not start game with these positions
-                // error message will be stored in errorMsg
-                // do something with it
-
-                var errorMsg = data.errorMsg;
-                alert(errorMsg);
-                return;
-            }
-
-            // true if the user attempted to join a game and was still waiting
-            if (data.waitingToJoin)
-            {
-                // do stuff
-            }
-            // true if the user joined a game and needed to set starting positions
-            if (data.settingPositions)
-            {
-                // do stuff
-            }
-            // true if the user joined a game and the game was in progress
-            if (data.inGame)
-            {
-                // do stuff
-            }
-
-            // the 10x10 field will be stored in data.field.
-            // This will consist of a double array of characters, each corresponding some unit or
-            // tile to display, the mapping is defined in home.jsp
-            var field = data.field;
-            drawField(field);
-        }
-    });
+        actionType : "newGame"
+    };
+    makeGameControlRequest(data);
 }
 
 /*
@@ -105,37 +21,13 @@ function setStartPositions()
             [ '8', '7', '7', '7', '7', '6', '6', '6', '6', '5' ],
             [ '5', '5', '5', '4', '4', '4', '3', '3', '2', '1' ] ];
 
-    $.ajax(
+    var data =
     {
-        url : "/Stratego/GameControl",
-        type : "POST",
-        dataType : "json",
-        data :
-        {
-            actionType : "setPositions",
-            positions : JSON.stringify(startingPositions)
-        },
-        success : function(data)
-        {
-            $("#serverResponse").text(JSON.stringify(data));
-            if (!data.isSuccessful)
-            {
-                // could not start game with these positions
-                // error message will be stored in errorMsg
-                // do something with it
+        actionType : "setPositions",
+        positions : JSON.stringify(startingPositions)
+    };
 
-                var errorMsg = data.errorMsg;
-                alert(errorMsg);
-                return;
-            }
-
-            // the 10x10 field will be stored in data.field.
-            // This will consist of a double array of characters, each corresponding some unit or
-            // tile to display, the mapping is defined in home.jsp
-            var field = data.field;
-            drawField(field);
-        }
-    });
+    makeGameControlRequest(data);
 }
 
 // Calls GameControl attempting to move the source to the destination. GameControl will return twice
@@ -147,8 +39,20 @@ function setStartPositions()
 // Parameters:
 // source: the location of the unit {row:y, col:x}
 // destination: where the unit should move to {row:y, col:x}
-
 function moveUnit(source, destination)
+{
+    var data =
+    {
+        actionType : "moveUnit",
+        source : source,
+        destination : destination
+    };
+
+    makeGameControlRequest(data);
+}
+
+var xmlReq;
+function makeGameControlRequest(JSONObjectToSend)
 {
     // need to manually handle readystatechange because there is
     // no way to do it in pure jquery apparently
@@ -156,23 +60,81 @@ function moveUnit(source, destination)
     {
         url : "/Stratego/GameControl",
         type : "POST",
-        data :
-        {
-            actionType : "moveUnit",
-            source : source,
-            destination : destination
-        }
+        data : JSONObjectToSend
     });
+    xmlReq.onreadystatechange = handleGameControlResponse(xmlReq);
+}
 
-    xmlReq.onreadystatechange = function()
+function handleGameControlResponse(xmlReq)
+{
+    if (xmlReq.readyState === 3)
     {
         // convert the responseText into JSON
         var data = JSON.parse(xmlReq.responseText);
 
-        if (xmlReq.readyState === 3)
+        // display response for debugging purposes
+        $("#serverResponse").text(JSON.stringify(data));
+
+        if (!data.isSuccessful)
         {
-            // A ready state of 3 means that the move was successful and we are waiting for the
-            // opponent to take their turn. There should be no error message here.
+            // could not move unit for some reason
+            // error message will be stored in errorMsg
+            // do something with it
+
+            var errorMsg = data.errorMsg;
+            alert(errorMsg);
+            return;
+        }
+        // A ready state of 3 means that the move was successful and we are waiting for the
+        // opponent to take their turn. There should be no error message here.
+
+        // the 10x10 field will be stored in data.field.
+        // This will consist of a double array of characters, each corresponding some unit or
+        // tile to display, the mapping is defined in home.jsp
+        var field = data.field;
+        drawField(field);
+    }
+    if (xmlReq.readyState === 4)
+    {
+        // convert the responseText into JSON
+        var data = JSON.parse(xmlReq.responseText);
+
+        // display response for debugging purposes
+        $("#serverResponse").text(JSON.stringify(data));
+
+        if (!data.isSuccessful)
+        {
+            // could not move unit for some reason
+            // error message will be stored in errorMsg
+            // do something with it
+
+            var errorMsg = data.errorMsg;
+            alert(errorMsg);
+            return;
+        }
+
+        if (data.gameWon != null)
+        {
+            // do stuff for a victorious game
+        }
+        else if (data.gameLost != null)
+        {
+            // do stuff for a lost game
+        }
+        else if (data.playerNum != null)
+        {
+            // do stuff for a new game
+
+            var playerNum = data.playerNum;
+
+            // opponent's username, display this somewhere
+            var opponent = data.opponent;
+
+            // allow the user to choose starting positions, etc ...
+        }
+        else
+        {
+            // just do regular display action
 
             // the 10x10 field will be stored in data.field.
             // This will consist of a double array of characters, each corresponding some unit or
@@ -180,80 +142,16 @@ function moveUnit(source, destination)
             var field = data.field;
             drawField(field);
         }
-        if (xmlReq.readyState === 4)
-        {
-            if (!data.isSuccessful)
-            {
-                // could not move unit for some reason
-                // error message will be stored in errorMsg
-                // do something with it
-
-                var errorMsg = data.errorMsg;
-                alert(errorMsg);
-
-                // the field will still come back if the move was unsuccessful, it will remain
-                // unchanged
-                // though, we can redraw it or not
-
-                // the 10x10 field will be stored in data.field.
-                // This will consist of a double array of characters, each corresponding some unit
-                // or
-                // tile to display, the mapping is defined in home.jsp
-                var field = data.field;
-                drawField(field);
-                return;
-            }
-
-            if (data.gameWon)
-            {
-                // do stuff for a victorious game
-            }
-            else if (data.gameLost)
-            {
-                // do stuff for a lost game
-            }
-            else
-            {
-                // just do regular display action
-            }
-        }
-    };
+    }
 }
 
 function quitGame()
 {
-    // need to manually handle readystatechange because there is
-    // no way to do it in pure jquery apparently
-    var xmlReq = $.ajax(
+    var data =
     {
-        url : "/Stratego/GameControl",
-        type : "POST",
-        data :
-        {
-            actionType : "quitGame"
-        },
-        success : function(data)
-        {
-            if (!data.isSuccessful)
-            {
-                // could not start game with these positions
-                // error message will be stored in errorMsg
-                // do something with it
-
-                var errorMsg = data.errorMsg;
-                alert(errorMsg);
-                return;
-            }
-
-            // do stuff for a lost game
-
-            // the 10x10 field will be stored in data.field.
-            // This will consist of a double array of characters, each corresponding some unit or
-            // tile to display, the mapping is defined in home.jsp
-            var field = data.field;
-            drawField(field);
-        }
-    });
+        actionType : "quitGame"
+    };
+    makeGameControlRequest(data);
 }
 
 /*
