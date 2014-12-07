@@ -14,7 +14,7 @@ public enum UnitType
 {
     FLAG(TileSymbol.FLAG, -1, 1),
     BOMB(TileSymbol.BOMB, -1, 6),
-    SPY(TileSymbol.SPY, -1, 1),
+    SPY(TileSymbol.SPY, 10, 1),
     SCOUT(TileSymbol.SCOUT, 9, 8),
     MINER(TileSymbol.MINER, 8, 5),
     SERGEANT(TileSymbol.SERGEANT, 7, 4),

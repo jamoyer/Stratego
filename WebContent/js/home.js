@@ -44,8 +44,8 @@ function moveUnit(source, destination)
     var data =
     {
         actionType : "moveUnit",
-        source : source,
-        destination : destination
+        source : JSON.stringify(source),
+        destination : JSON.stringify(destination)
     };
 
     makeGameControlRequest(data);

@@ -10,8 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import stratego.model.Field;
+import stratego.model.Position;
 import stratego.model.ResponseMessage;
 import stratego.user.Validator;
 
@@ -30,8 +33,8 @@ public class GameControl extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException
     {
         GameInstanceController gameController = GameInstanceController.getInstanceController();
         PrintWriter output = response.getWriter();
@@ -65,6 +68,7 @@ public class GameControl extends HttpServlet
                 System.out.println("New Game Request by user: " + user);
                 gameController.newGame(rspMsg, user);
                 break;
+
             case "setPositions":
                 System.out.println("Set Positions Request by user: " + user);
                 // get starting positions
@@ -74,8 +78,7 @@ public class GameControl extends HttpServlet
                     System.out.println("GameControl: positions not set.");
                     rspMsg.setSuccessful(false);
                     rspMsg.setErrorMsg("Positions not set correctly.");
-                    output.print(rspMsg.getMessage());
-                    return;
+                    break;
                 }
                 char[][] field = convertStringToField(positions);
                 if (field == null)
@@ -83,17 +86,54 @@ public class GameControl extends HttpServlet
                     System.out.println("GameControl: field from positions is null.");
                     rspMsg.setSuccessful(false);
                     rspMsg.setErrorMsg("Positions not set correctly.");
-                    output.print(rspMsg.getMessage());
-                    return;
+                    break;
                 }
-                gameController.setPositions(rspMsg, user, field);
-                break;
+                gameController.setPositions(output, rspMsg, user, field);
+                return;
+
             case "moveUnit":
-                break;
+                String s = request.getParameter("source");
+                if (s == null || Validator.emptyString(s))
+                {
+                    System.out.println("GameControl: source not set.");
+                    rspMsg.setSuccessful(false);
+                    rspMsg.setErrorMsg("Source not set correctly.");
+                    break;
+                }
+                String d = request.getParameter("destination");
+                if (d == null || Validator.emptyString(d))
+                {
+                    System.out.println("GameControl: destination not set.");
+                    rspMsg.setSuccessful(false);
+                    rspMsg.setErrorMsg("Destination not set correctly.");
+                    break;
+                }
+                Position source = null;
+                Position destination = null;
+                try
+                {
+                    JSONObject jsonSource = new JSONObject(s);
+                    source = new Position(jsonSource.getInt("row"), jsonSource.getInt("col"));
+                    JSONObject jsonDestination = new JSONObject(s);
+                    destination = new Position(jsonDestination.getInt("row"), jsonDestination.getInt("col"));
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    System.out.println("GameControl: unable to parse JSON.");
+                    rspMsg.setSuccessful(false);
+                    rspMsg.setErrorMsg("Unable to parse JSON");
+                    break;
+                }
+                gameController.moveUnit(output, rspMsg, user, source, destination);
+                return;
+
             case "quitGame":
                 break;
+
             case "getCurrentGame":
                 break;
+
             default:
                 rspMsg.setSuccessful(false);
                 rspMsg.setErrorMsg("Invalid Action Type.");

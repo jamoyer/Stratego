@@ -34,8 +34,7 @@ public class Tile
     {
         if (this.obstacle && unit != null)
         {
-            throw new IllegalArgumentException(
-                    "Only playable tiles may have a unit.");
+            throw new IllegalArgumentException("Only playable tiles may have a unit.");
         }
         this.unit = unit;
     }

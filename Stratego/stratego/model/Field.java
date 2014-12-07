@@ -14,23 +14,30 @@ public class Field
         this.grid = new Tile[ROWS][COLUMNS];
 
         // initialize new battlefield
-        for (int i = 0; i < ROWS; i++)
+        for (int row = 0; row < ROWS; row++)
         {
-            for (int j = 0; j < COLUMNS; j++)
+            for (int col = 0; col < COLUMNS; col++)
             {
-                Position pos = new Position(i, j);
+                Position pos = new Position(row, col);
 
                 // make obstacles for stratego field
-                if ((i == 4 || i == 5) && (j == 2 || j == 3 || j == 6 || j == 7))
+                if ((row == 4 || row == 5) && (col == 2 || col == 3 || col == 6 || col == 7))
                 {
-                    this.grid[i][j] = new Tile(pos, true);
+                    this.grid[row][col] = new Tile(pos, true);
                 }
                 else
                 {
-                    this.grid[i][j] = new Tile(pos, false);
+                    this.grid[row][col] = new Tile(pos, false);
                 }
             }
         }
+    }
+
+    public static boolean checkPositionIsWithinBounds(final Position pos)
+    {
+        int row = pos.getRow();
+        int col = pos.getColumn();
+        return (row >= 0 && row <= ROWS - 1) && (col >= 0 && col <= COLUMNS - 1);
     }
 
     private Tile getTileAt(final Position pos)

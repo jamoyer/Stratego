@@ -16,25 +16,38 @@ public class GameInstance
     private PlayerPosition winner = null;
     private PlayerPosition currentTurn = null;
 
+    // a grid available for showing the players which units are fighting each
+    // other during combat
+    private char[][] battleRevealGrid = null;
+
     public GameInstance(final String player, final long currentTimeSeconds)
     {
         this.bottomPlayer = player;
         this.initiatedTime = currentTimeSeconds;
     }
 
-    public synchronized void setCurrentTurn(final boolean bottomPlayersTurn)
+    public void setBattleRevealGrid(final char[][] grid)
     {
-        if (bottomPlayersTurn)
+        synchronized (this)
         {
-            this.currentTurn = PlayerPosition.BOTTOM_PLAYER;
-        }
-        else
-        {
-            this.currentTurn = PlayerPosition.TOP_PLAYER;
+            this.battleRevealGrid = grid;
         }
     }
 
-    public PlayerPosition getCurrentTurn()
+    public char[][] getBattleRevealGrid()
+    {
+        synchronized (this)
+        {
+            return this.battleRevealGrid;
+        }
+    }
+
+    public synchronized void setTurn(final PlayerPosition userPos)
+    {
+        this.currentTurn = userPos;
+    }
+
+    public PlayerPosition getTurn()
     {
         return this.currentTurn;
     }
