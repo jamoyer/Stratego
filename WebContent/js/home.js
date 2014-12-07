@@ -39,7 +39,7 @@ function setStartPositions()
 // Parameters:
 // source: the location of the unit {row:y, col:x}
 // destination: where the unit should move to {row:y, col:x}
-function moveUnit(source, destination)
+function sendMoveRequest(source, destination)
 {
     var data =
     {
@@ -49,6 +49,21 @@ function moveUnit(source, destination)
     };
 
     makeGameControlRequest(data);
+}
+
+/*
+ * Gets values from the text box inputs and submits them as data to sendMoveRequest
+ */
+function moveUnit()
+{
+    var source = {};
+    source.row = $("#sourceRow").val();
+    source.row = $("#sourceRow").val();
+
+    var destination = {};
+    destination.row = $("#destinationRow").val();
+    destination.row = $("#destinationRow").val();
+    sendMoveRequest(source, destination);
 }
 
 var xmlReq;
