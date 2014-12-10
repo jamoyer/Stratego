@@ -19,18 +19,21 @@ public class GameInstanceController
     private static final long MAX_QUEUE_TIME_TO_START_GAME_SECONDS = 60;
     private static final long THREAD_SLEEP_SECONDS = 1;
     private static final long MODERATOR_THREAD_SLEEP_SECONDS = 5;
-    private static final int INITIAL_INSTANCES_CAPACITY = 30;
+
     // 3 minutes of inactivity allowed for each player before game dies
     private static final int TIME_OUT_SECONDS = 180;
 
-    private final HashMap<String, GameInstance> _gameInstances;
-
     private static GameInstanceController _instController = null;
     private static Random _rand = null;
+    private static final String CLASS_LOG = "GameInstanceController: ";
+
+    private void logMsg(final String msg)
+    {
+        System.out.println(CLASS_LOG + msg);
+    }
 
     private GameInstanceController()
     {
-        _gameInstances = new HashMap<String, GameInstance>(INITIAL_INSTANCES_CAPACITY);
         _rand = new Random();
 
         // end games that have met their time limit
@@ -42,7 +45,7 @@ public class GameInstanceController
                 while (true)
                 {
                     long now = Validator.currentTimeSeconds();
-                    for (GameInstance game : _gameInstances.values())
+                    for (GameInstance game : AppContext.getGames())
                     {
                         // only check games that have two players set
                         if (game.getTopPlayer() != null)
@@ -50,14 +53,14 @@ public class GameInstanceController
 
                             if ((now - game.checkPlayerLastResponsetime(PlayerPosition.TOP_PLAYER)) > TIME_OUT_SECONDS)
                             {
-                                game.setWinner(PlayerPosition.BOTTOM_PLAYER);
-                                System.out.println("GameInstanceModerator: " + game.getWinnerName()
+                                game.setWinner(PlayerPosition.BOTTOM_PLAYER, now);
+                                logMsg("GameInstanceModerator: " + game.getWinnerName()
                                         + " has won a game due to opponent time out.");
                             }
                             else if ((now - game.checkPlayerLastResponsetime(PlayerPosition.BOTTOM_PLAYER)) > TIME_OUT_SECONDS)
                             {
-                                game.setWinner(PlayerPosition.TOP_PLAYER);
-                                System.out.println("GameInstanceModerator: " + game.getWinnerName()
+                                game.setWinner(PlayerPosition.TOP_PLAYER, now);
+                                logMsg("GameInstanceModerator: " + game.getWinnerName()
                                         + " has won a game due to opponent time out.");
                             }
                         }
@@ -85,12 +88,12 @@ public class GameInstanceController
     {
         if (_instController == null)
         {
-            System.out.println("Getting GameInstanceController");
+            System.out.println(CLASS_LOG + "Getting GameInstanceController");
             synchronized (GameInstanceController.class)
             {
                 if (_instController == null)
                 {
-                    System.out.println("Instantiating GameInstanceController");
+                    System.out.println(CLASS_LOG + "Instantiating GameInstanceController");
                     _instController = new GameInstanceController();
                 }
             }
@@ -106,17 +109,17 @@ public class GameInstanceController
      */
     public GameInstance getGameByUser(final String user)
     {
-        System.out.println("GameInstanceController: looking for user: " + user + "'s game.");
+        logMsg("Looking for user: " + user + "'s game.");
 
-        GameInstance game = _gameInstances.get(user);
+        GameInstance game = AppContext.getGame(user);
 
         if (game != null)
         {
-            System.out.println("GameInstanceController: user: " + user + "'s game found.");
+            logMsg(user + "'s game found.");
         }
         else
         {
-            System.out.println("GameInstanceController: user: " + user + "'s game was not found.");
+            logMsg(user + "'s game was not found.");
         }
 
         return game;
@@ -130,16 +133,16 @@ public class GameInstanceController
      */
     private GameInstance getJoinableGame()
     {
-        System.out.println("GameInstanceController: looking for joinable game.");
-        for (GameInstance game : _gameInstances.values())
+        logMsg("Looking for joinable game.");
+        for (GameInstance game : AppContext.getGames())
         {
             if (game.getTopPlayer() == null)
             {
-                System.out.println("GameInstanceController: joinable game found.");
+                logMsg("Joinable game found.");
                 return game;
             }
         }
-        System.out.println("GameInstanceController: no joinable game found.");
+        logMsg("No joinable game found.");
         return null;
     }
 
@@ -156,11 +159,11 @@ public class GameInstanceController
      */
     public void newGame(final ResponseMessage rspMsg, final String user)
     {
-        System.out.println("GameInstanceController: processing newGame request");
+        logMsg("Processing newGame request");
         // check if the user is currently in a game
         if (getGameByUser(user) != null)
         {
-            System.out.println("user: " + user + " already has a game running.");
+            logMsg(user + " already has a game running.");
             rspMsg.setSuccessful(false);
             rspMsg.setErrorMsg("Cannot start new game, a game is already in progress.");
             return;
@@ -170,16 +173,15 @@ public class GameInstanceController
         GameInstance game = getJoinableGame();
         if (game != null)
         {
-            System.out.println("GameInstanceController: user: " + user + " is joining user: " + game.getBottomPlayer()
-                    + "'s game.");
+            logMsg(user + " is joining " + game.getBottomPlayer() + "'s game.");
             game.setTopPlayer(user);
-            _gameInstances.put(user, game);
+            AppContext.putGame(user, game);
         }
         else
         {
-            System.out.println("GameInstanceController: user: " + user + " is creating a new game.");
+            logMsg(user + " is creating a new game.");
             game = new GameInstance(user, Validator.currentTimeSeconds());
-            _gameInstances.put(user, game);
+            AppContext.putGame(user, game);
             int waitingTime = 0;
 
             // I'm not sure if this is the correct way to go or if we should
@@ -187,7 +189,7 @@ public class GameInstanceController
             // what this is doing right now is tying up a thread until a second
             // player joins.
 
-            System.out.println("GameInstanceController: user: " + user + " is waiting for another player.");
+            logMsg(user + " is waiting for another player.");
             // sleep until the second player has joined the game
             while (Validator.emptyString(game.getTopPlayer()))
             {
@@ -207,9 +209,8 @@ public class GameInstanceController
                 // check for time out
                 if (waitingTime >= MAX_QUEUE_TIME_TO_START_GAME_SECONDS)
                 {
-                    System.out.println("GameInstanceController: user: " + user
-                            + "'s game has timed out while waiting for another player.");
-                    _gameInstances.remove(game);
+                    logMsg(user + "'s game has timed out while waiting for another player.");
+                    AppContext.removeGame(user);
                     rspMsg.setSuccessful(false);
                     rspMsg.setErrorMsg("Game timed out after " + MAX_QUEUE_TIME_TO_START_GAME_SECONDS
                             + " seconds. There are probably no other players.");
@@ -222,7 +223,7 @@ public class GameInstanceController
         // should not be null, or have a missing player.
         if (game == null || Validator.emptyString(game.getBottomPlayer()) || Validator.emptyString(game.getTopPlayer()))
         {
-            System.out.println("GameInstanceController: user: " + user + "'s game failed the sanity check.");
+            logMsg(user + "'s game failed the sanity check.");
             rspMsg.setSuccessful(false);
             rspMsg.setErrorMsg("Game was null or had a missing player after setup.");
             return;
@@ -230,7 +231,7 @@ public class GameInstanceController
 
         // Hurray, both players have joined!
         // Create response so players can choose starting positions
-        System.out.println("GameInstanceController: user: " + user + "'s game is all good to go, sending response.");
+        logMsg(user + "'s game is all good to go, sending response.");
         rspMsg.setSuccessful(true);
         PlayerPosition userPos = game.getPlayerPosition(user);
         rspMsg.setPlayerPosition(userPos);
@@ -262,9 +263,10 @@ public class GameInstanceController
         // user has to be in a game
         if (game == null)
         {
-            System.out.println("GameInstanceController: user: " + user + " is not in a game.");
+            logMsg(user + " is not in a game.");
             rspMsg.setErrorMsg("Unable to set positions: User is not in a game.");
             output.print(rspMsg.getMessage());
+            output.flush();
             return;
         }
 
@@ -274,18 +276,20 @@ public class GameInstanceController
         // don't let players reset their starting positions
         if (game.checkPlayerHasSetPositions(user))
         {
-            System.out.println("GameInstanceController: user: " + user + " has already set starting positions.");
+            logMsg(user + " has already set starting positions.");
             rspMsg.setErrorMsg("Unable to set positions: Starting positions already set.");
             output.print(rspMsg.getMessage());
+            output.flush();
             return;
         }
 
         // shouldn't be necessary to check this but if we can't be too careful.
         if (positions.length != Field.getStartingPlayerRowCount() || positions[0].length != Field.getColumnCount())
         {
-            System.out.println("GameInstanceController: user: " + user + "'s positions are not the right size.");
+            logMsg(user + "'s positions are not the right size.");
             rspMsg.setErrorMsg("Unable to set positions: Positions are not the right size.");
             output.print(rspMsg.getMessage());
+            output.flush();
             return;
         }
 
@@ -308,11 +312,11 @@ public class GameInstanceController
                 UnitType unitType = UnitType.getUnitByChar(symbol);
                 if (unitType == null)
                 {
-                    System.out.println("GameInstanceController: " + symbol
-                            + " does not correlate to a valid unit type.");
+                    logMsg(symbol + " does not correlate to a valid unit type.");
                     rspMsg.setErrorMsg("Unable to set positions: " + symbol
                             + " does not correlate to a valid unit type.");
                     output.print(rspMsg.getMessage());
+                    output.flush();
                     return;
                 }
                 Unit unit = new Unit(unitType, userPos);
@@ -342,23 +346,22 @@ public class GameInstanceController
         {
             if (count.intValue() != 0)
             {
-                System.out.println("GameInstanceController: cannot set positions for " + user
-                        + ", unit count is incorrect.");
+                logMsg("Cannot set positions for " + user + ", unit count is incorrect.");
                 rspMsg.setErrorMsg("Unable to set positions: unit count is incorrect.");
                 output.print(rspMsg.getMessage());
+                output.flush();
                 return;
             }
         }
 
         // show that we have set our positions
-        System.out.println("GameInstanceController: user: " + user + "'s positions are set.");
+        logMsg(user + "'s positions are set.");
         game.setPlayerHasStartingPositions(userPos);
 
         // wait for opponent to set their positions
         while (!game.checkPlayerHasSetPositions(GameInstance.negatePosition(userPos)))
         {
-            System.out.println("GameInstanceController: " + user + " is waiting for " + game.getOpponent(userPos)
-                    + " to set starting positions.");
+            logMsg(user + " is waiting for " + game.getOpponent(userPos) + " to set starting positions.");
 
             // need to pick a player to go first if it hasn't been done already
             if (game.getTurn() == null)
@@ -376,11 +379,7 @@ public class GameInstanceController
             // make sure other player didn't leave
             if (game.getWinner() != null)
             {
-                // TODO: win game
-                System.out.println("GameInstanceController: " + game.getWinnerName() + " has won a game.");
-                rspMsg.setErrorMsg("Game Over.");
-                output.print(rspMsg.getMessage());
-                return;
+                break;
             }
 
             // otherwise wait until the other player is ready
@@ -395,68 +394,108 @@ public class GameInstanceController
             }
         }
 
-        // Hurray, all starting positions are set, the combat may begin!
-        System.out.println("GameInstanceController: user: " + user + "'s positions are set and opponent: "
-                + game.getOpponent(userPos) + "'s positions are set. Waiting for moves.");
+        // need to check fow winners, either by a player leaving and timing out
+        // or by a player blocking themselves in with bombs
+        if (game.getWinner() != null || game.checkForWin(Validator.currentTimeSeconds()))
+        {
+            // reveal the units to the user
+            char[][] revealGrid = game.getExposedFieldByPlayer(userPos);
+            rspMsg.setField(revealGrid);
+
+            // reveal the units to the opponent
+            char[][] enemyView = game.getExposedFieldByPlayer(game.getOpponent(userPos));
+            // wait until opponent has processed the previous revealGrid
+            while (game.getBattleRevealGrid() != null)
+            {
+            }
+            game.setBattleRevealGrid(enemyView);
+        }
+        else
+        {
+            rspMsg.setField(game.getFieldSymbolsByPlayer(userPos));
+        }
+
+        // display the result of this move
         rspMsg.setSuccessful(true);
+        rspMsg.setGameWon(userPos.equals(game.getWinner()));
+        rspMsg.setGameLost(userPos.equals(GameInstance.negatePosition(game.getWinner())));
         rspMsg.setTurn(game.getTurn());
-        rspMsg.setField(game.getFieldSymbolsByPlayer(userPos));
-
-        // prints the json response message
         output.print(rspMsg.getMessage());
+        output.flush();
 
-        // the player that isn't going first needs to wait for the other player
-        // to take their turn
-        waitForPlayersTurn(output, rspMsg, game, userPos);
+        // only wait if the game is still going
+        if (game.getWinner() == null)
+        {
+            // Hurray, all starting positions are set, the combat may begin!
+            logMsg(user + "'s positions are set and opponent: " + game.getOpponent(userPos)
+                    + "'s positions are set. Waiting for moves.");
+
+            // the player that isn't going first needs to wait for the other
+            // player to take their turn
+            waitForPlayersTurn(output, rspMsg, game, userPos);
+        }
     }
 
     private void waitForPlayersTurn(final PrintWriter output, final ResponseMessage rspMsg, final GameInstance game,
             final PlayerPosition userPos)
     {
-        if (!game.getTurn().equals(userPos))
+        if (game.getTurn() == null || game.getTurn().equals(userPos))
         {
-            // wait until the other player is done
-            while (!game.getTurn().equals(userPos))
-            {
-                try
-                {
-                    System.out.println("GameInstanceController: user: " + game.getPlayer(userPos)
-                            + " is waiting for user: " + game.getOpponent(userPos) + " to finish their turn.");
-
-                    // x1000 because sleep takes milliseconds
-                    Thread.sleep(THREAD_SLEEP_SECONDS * 1000);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-
-                char[][] revealGrid = game.getBattleRevealGrid();
-                if (revealGrid != null)
-                {
-                    rspMsg.setSuccessful(true);
-                    rspMsg.setField(revealGrid);
-
-                    // prints the json response message
-                    output.print(rspMsg.getMessage());
-                    game.setBattleRevealGrid(null);
-                }
-            }
-
-            // need to check if the game is still going
-            if (game.getWinner() != null)
-            {
-                // TODO: win game stuff
-            }
-
-            // its our turn now, display the new grid
-            rspMsg.setSuccessful(true);
-            rspMsg.setTurn(game.getTurn());
-            rspMsg.setField(game.getFieldSymbolsByPlayer(userPos));
-
-            // prints the json response message
-            output.print(rspMsg.getMessage());
+            return;
         }
+
+        // wait until the other player is done
+        while (game.getTurn() != null && !game.getTurn().equals(userPos))
+        {
+            // wait some time
+            try
+            {
+                logMsg(game.getPlayer(userPos) + " is waiting for " + game.getOpponent(userPos)
+                        + " to finish their turn.");
+
+                // x1000 because sleep takes milliseconds
+                Thread.sleep(THREAD_SLEEP_SECONDS * 1000);
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+
+            // display any message that has occured because of the other user
+            char[][] revealGrid = game.getBattleRevealGrid();
+            if (revealGrid != null)
+            {
+                rspMsg.setSuccessful(true);
+                rspMsg.setField(revealGrid);
+                rspMsg.setTurn(game.getTurn());
+
+                // prints the json response message
+                output.print(rspMsg.getMessage());
+                output.flush();
+                game.setBattleRevealGrid(null);
+            }
+        }
+
+        // need to check if the game is still going
+        if (game.getWinner() != null)
+        {
+            // display the winning results
+            rspMsg.setField(game.getBattleRevealGrid());
+            rspMsg.setGameWon(game.getWinner().equals(userPos));
+            rspMsg.setGameLost(game.getWinner().equals(GameInstance.negatePosition(userPos)));
+        }
+        else
+        {
+            rspMsg.setField(game.getFieldSymbolsByPlayer(userPos));
+        }
+
+        // its our turn now, display the new grid
+        rspMsg.setSuccessful(true);
+        rspMsg.setTurn(game.getTurn());
+
+        // prints the json response message
+        output.print(rspMsg.getMessage());
+        output.flush();
     }
 
     public void moveUnit(PrintWriter output, ResponseMessage rspMsg, final String user, final Position source,
@@ -468,130 +507,28 @@ public class GameInstanceController
         // user has to be in a game
         if (game == null)
         {
-            System.out.println("GameInstanceController: user: " + user + " is not in a game.");
+            logMsg(user + " is not in a game.");
             rspMsg.setErrorMsg("Unable to move unit: User is not in a game.");
             output.print(rspMsg.getMessage());
+            output.flush();
             return;
         }
 
         // update the response time
         game.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
 
-        // make sure source position is valid
-        if (!Field.checkPositionIsWithinBounds(source))
+        // check that this move is valid
+        if (!game.isValidMove(rspMsg, user, source, destination, true, false))
         {
-            System.out.println("GameInstanceController: user: " + user + " entered an invalid source position.");
-            rspMsg.setErrorMsg("Unable to move unit: Source position is out of bounds.");
+            logMsg("Invalid move for " + user);
             output.print(rspMsg.getMessage());
-            return;
-        }
-
-        // make sure destination position is valid
-        if (!Field.checkPositionIsWithinBounds(destination))
-        {
-            System.out.println("GameInstanceController: user: " + user + " entered an invalid destination position.");
-            rspMsg.setErrorMsg("Unable to move unit: Destination position is out of bounds.");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
-        // make sure the game is still on
-        if (game.getWinner() != null)
-        {
-            System.out.println("GameInstanceController: user: " + user + " cannot move unit because game is over");
-            rspMsg.setErrorMsg("Unable to move unit: game is over.");
-            output.print(rspMsg.getMessage());
+            output.flush();
             return;
         }
 
         PlayerPosition userPos = game.getPlayerPosition(user);
-
-        // don't let players move units if it isn't their turn
-        if (userPos == null || !userPos.equals(game.getTurn()))
-        {
-            System.out.println("GameInstanceController: user: " + user + " cannot move because it is not their turn.");
-            rspMsg.setErrorMsg("Unable to move unit, it is not " + user + "'s turn.");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
-        // cannot move diagonally
-        if (destination.getRow() != source.getRow() && destination.getColumn() != source.getColumn())
-        {
-            System.out.println("GameInstanceController: user: " + user + " tried to move diagonally.");
-            rspMsg.setErrorMsg("Unable to move unit, units cannot move diagonally");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
         Unit sourceUnit = game.getField().getUnitAt(source);
-
-        // make sure there is a unit at source
-        if (sourceUnit == null)
-        {
-            System.out.println("GameInstanceController: user: " + user + " tile at source is not a unit.");
-            rspMsg.setErrorMsg("Unable to move unit, tile at source is not a unit.");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
-        // make sure the unit belongs to the user
-        if (!userPos.equals(sourceUnit.getPlayer()))
-        {
-            System.out.println("GameInstanceController: user: " + user + " does not own the unit at source");
-            rspMsg.setErrorMsg("Unable to move unit, unit does not belong to the user.");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
-        // bombs and flags are not allowed to move
-        if (sourceUnit.getType().equals(UnitType.BOMB) || sourceUnit.getType().equals(UnitType.FLAG))
-        {
-            System.out.println("GameInstanceController: user: " + user + " attempted to move an unmoveable unit.");
-            rspMsg.setErrorMsg("Unable to move unit, unit cannot move.");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
         Unit destUnit = game.getField().getUnitAt(destination);
-
-        // cannot move into an allied unit
-        if (destUnit != null && destUnit.getPlayer().equals(userPos))
-        {
-            System.out.println("GameInstanceController: user: " + user + " attempted to move into an allied unit.");
-            rspMsg.setErrorMsg("Unable to move unit, destination is an allied unit.");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
-        // cannot move into an obstacle
-        if (destUnit == null && game.getField().isObstacle(destination))
-        {
-            System.out.println("GameInstanceController: user: " + user + " attempted to move into an obstacle.");
-            rspMsg.setErrorMsg("Unable to move unit, destination is an obstacle.");
-            output.print(rspMsg.getMessage());
-            return;
-        }
-
-        // unless the unit is a scout, it cannot move more than one tile away
-        // from the source
-        if (!sourceUnit.getType().equals(UnitType.SCOUT))
-        {
-            if ((destination.getRow() != source.getRow() + 1 || destination.getRow() != source.getRow() - 1
-                    || destination.getColumn() != source.getColumn() + 1 || destination.getColumn() != source
-                    .getColumn() - 1))
-            {
-                System.out.println("GameInstanceController: user: " + user
-                        + " attempted to move a non-scout unit more than one tile away.");
-                rspMsg.setErrorMsg("Unable to move unit, unit cannot move more than one tile.");
-                output.print(rspMsg.getMessage());
-                return;
-            }
-        }
-
-        /*
-         * At this point we know it is a valid move.
-         */
 
         rspMsg.setSuccessful(true);
 
@@ -609,11 +546,11 @@ public class GameInstanceController
             char[][] revealGrid = game.getFieldSymbolsByPlayer(user);
             revealGrid[destination.getRow()][destination.getColumn()] = game.getField().getUnitAt(destination)
                     .getEnemyType().getSymbol();
-            rspMsg.setSuccessful(true);
             rspMsg.setField(revealGrid);
 
             // prints the json response message
             output.print(rspMsg.getMessage());
+            output.flush();
 
             // reveal the units to the opponent
             revealGrid = game.getFieldSymbolsByPlayer(game.getOpponent(userPos));
@@ -622,11 +559,11 @@ public class GameInstanceController
             game.setBattleRevealGrid(revealGrid);
 
             /*
-             * Combat logic
+             * Start Combat logic
              */
 
             // check for a tie
-            if (sourceUnit.getType() == destUnit.getType())
+            if (sourceUnit.getType().equals(destUnit.getType()))
             {
                 // both die
                 game.getField().setUnitAt(source, null);
@@ -634,8 +571,7 @@ public class GameInstanceController
             }
 
             // check for spy and marshall
-            else if ((sourceUnit.getType().equals(UnitType.SPY) || destUnit.getType().equals(UnitType.SPY))
-                    && (sourceUnit.getType().equals(UnitType.MARSHALL) || destUnit.getType().equals(UnitType.MARSHALL)))
+            else if ((sourceUnit.getType().equals(UnitType.SPY)) && destUnit.getType().equals(UnitType.MARSHALL))
             {
                 // attacker wins
                 game.getField().setUnitAt(source, null);
@@ -644,6 +580,7 @@ public class GameInstanceController
 
             // check for regular unit
             // (a unit with a rank of 1-10 or simply not a rank of -1)
+            // winner moves into losers tile after combat
             else if ((sourceUnit.getType().getRank() != -1) && (destUnit.getType().getRank() != -1))
             {
                 // if attacker is a lower rank than enemy, enemy is defeated
@@ -655,7 +592,8 @@ public class GameInstanceController
                 // enemy has a higher rank and attacker is defeated
                 else
                 {
-                    game.getField().setUnitAt(source, null);
+                    game.getField().setUnitAt(source, destUnit);
+                    game.getField().setUnitAt(destination, null);
                 }
             }
 
@@ -676,22 +614,49 @@ public class GameInstanceController
             // check for flag capture
             else if (destUnit.getType().equals(UnitType.FLAG))
             {
-                // TODO: win game stuff
+                game.getField().setUnitAt(destination, sourceUnit);
+                game.getField().setUnitAt(source, null);
+                game.setWinner(userPos, Validator.currentTimeSeconds());
             }
         }
 
         /*
-         * user's turn is now over
+         * End combat logic
          */
 
-        game.setTurn(GameInstance.negatePosition(userPos));
+        if (game.checkForWin(Validator.currentTimeSeconds()))
+        {
+            // reveal the units to the user
+            char[][] revealGrid = game.getExposedFieldByPlayer(userPos);
+            rspMsg.setField(revealGrid);
 
-        // display the result of this move
+            // reveal the units to the opponent
+            char[][] enemyView = game.getExposedFieldByPlayer(game.getOpponent(userPos));
+            // wait until opponent has processed the previous revealGrid
+            while (game.getBattleRevealGrid() != null)
+            {
+            }
+            game.setBattleRevealGrid(enemyView);
+        }
+        else
+        {
+            rspMsg.setField(game.getFieldSymbolsByPlayer(userPos));
+            // user's turn is now over
+            game.setTurn(GameInstance.negatePosition(userPos));
+        }
+
+        // display the result of this game
+        rspMsg.setGameWon(userPos.equals(game.getWinner()));
+        rspMsg.setGameLost(GameInstance.negatePosition(userPos).equals(game.getWinner()));
         rspMsg.setTurn(game.getTurn());
-        rspMsg.setField(game.getFieldSymbolsByPlayer(userPos));
         output.print(rspMsg.getMessage());
+        output.flush();
 
-        // wait for next user to be done
-        waitForPlayersTurn(output, rspMsg, game, userPos);
+        // only wait if the game is still going
+        if (game.getWinner() == null)
+        {
+            // wait for next user to be done
+            waitForPlayersTurn(output, rspMsg, game, userPos);
+        }
     }
 }

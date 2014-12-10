@@ -36,12 +36,16 @@
     <div>
         <button onclick="joinNewGame()">New Game</button>
         <button onclick="setStartPositions()">Set Start Positions</button>
-        <h5>source</h5>
-        <p>Source Row</p><input type="text" id="sourceRow"></input>
-        <p>Source Column</p><input type="text" id="sourceCol"></input>
-        <h5>destination</h5>
-        <p>Source Row</p><input type="text" id="destinationRow"></input>
-        <p>Destination Column</p><input type="text" id="destinationCol"></input>
+        <h5>Source</h5>
+        <p>Source Row</p>
+        <input type="text" id="sourceRow"></input>
+        <p>Source Column</p>
+        <input type="text" id="sourceCol"></input>
+        <h5>Destination</h5>
+        <p>Destination Row</p>
+        <input type="text" id="destinationRow"></input>
+        <p>Destination Column</p>
+        <input type="text" id="destinationCol"></input>
         <button onclick="moveUnit()">Move Unit</button>
     </div>
     <div>

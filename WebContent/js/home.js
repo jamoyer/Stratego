@@ -58,106 +58,120 @@ function moveUnit()
 {
     var source = {};
     source.row = $("#sourceRow").val();
-    source.row = $("#sourceRow").val();
+    source.col = $("#sourceCol").val();
 
     var destination = {};
     destination.row = $("#destinationRow").val();
-    destination.row = $("#destinationRow").val();
+    destination.col = $("#destinationCol").val();
     sendMoveRequest(source, destination);
 }
 
-var xmlReq;
 function makeGameControlRequest(JSONObjectToSend)
 {
-    // need to manually handle readystatechange because there is
-    // no way to do it in pure jquery apparently
-    var xmlReq = $.ajax(
+    var xmlReq = new XMLHttpRequest();
+    xmlReq.open('POST', '/Stratego/GameControl', true);
+    xmlReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xmlReq.onreadystatechange = function()
     {
-        url : "/Stratego/GameControl",
-        type : "POST",
-        data : JSONObjectToSend
-    });
-    xmlReq.onreadystatechange = handleGameControlResponse(xmlReq);
-}
-
-function handleGameControlResponse(xmlReq)
-{
-    if (xmlReq.readyState === 3)
-    {
-        // convert the responseText into JSON
-        var data = JSON.parse(xmlReq.responseText);
-
-        // display response for debugging purposes
-        $("#serverResponse").text(JSON.stringify(data));
-
-        if (!data.isSuccessful)
+        function parseGameControlResponse(rspTxt)
         {
-            // could not move unit for some reason
-            // error message will be stored in errorMsg
-            // do something with it
-
-            var errorMsg = data.errorMsg;
-            alert(errorMsg);
-            return;
+            var responseArray = [];
+            var startIndex;
+            for (var i = 0; i < rspTxt.length; i++)
+            {
+                if (rspTxt.charAt(i) === '{')
+                {
+                    startIndex = i;
+                }
+                else if (rspTxt.charAt(i) === '}')
+                {
+                    var objectText = rspTxt.substring(startIndex, i + 1);
+                    var responseObject = JSON.parse(objectText);
+                    responseArray.push(responseObject);
+                }
+            }
+            return responseArray;
         }
-        // A ready state of 3 means that the move was successful and we are waiting for the
-        // opponent to take their turn. There should be no error message here.
 
-        // the 10x10 field will be stored in data.field.
-        // This will consist of a double array of characters, each corresponding some unit or
-        // tile to display, the mapping is defined in home.jsp
-        var field = data.field;
-        drawField(field);
+        if (xmlReq.readyState === 3)
+        {
+            // convert the responseText into JSON
+            var data = parseGameControlResponse(xmlReq.responseText);
+
+            // display response for debugging purposes
+            $("#serverResponse").text(JSON.stringify(data));
+
+            // if (!data.isSuccessful)
+            // {
+            // // could not move unit for some reason
+            // // error message will be stored in errorMsg
+            // // do something with it
+            //
+            // var errorMsg = data.errorMsg;
+            // alert(errorMsg);
+            // return;
+            // }
+            // // A ready state of 3 means that the move was successful and we are waiting for the
+            // // opponent to take their turn. There should be no error message here.
+            //
+            // // the 10x10 field will be stored in data.field.
+            // // This will consist of a double array of characters, each corresponding some unit or
+            // // tile to display, the mapping is defined in home.jsp
+            // var field = data.field;
+            // drawField(field);
+        }
+        if (xmlReq.readyState === 4)
+        {
+            // convert the responseText into JSON
+            var data = parseGameControlResponse(xmlReq.responseText);
+
+            // display response for debugging purposes
+            $("#serverResponse").text(JSON.stringify(data));
+
+            // if (!data.isSuccessful)
+            // {
+            // // could not move unit for some reason
+            // // error message will be stored in errorMsg
+            // // do something with it
+            //
+            // var errorMsg = data.errorMsg;
+            // alert(errorMsg);
+            // return;
+            // }
+            //
+            // if (data.gameWon != null)
+            // {
+            // // do stuff for a victorious game
+            // }
+            // else if (data.gameLost != null)
+            // {
+            // // do stuff for a lost game
+            // }
+            // else if (data.playerNum != null)
+            // {
+            // // do stuff for a new game
+            //
+            // var playerNum = data.playerNum;
+            //
+            // // opponent's username, display this somewhere
+            // var opponent = data.opponent;
+            //
+            // // allow the user to choose starting positions, etc ...
+            // }
+            // else
+            // {
+            // // just do regular display action
+            //
+            // // the 10x10 field will be stored in data.field.
+            // // This will consist of a double array of characters, each corresponding some unit
+            // // or
+            // // tile to display, the mapping is defined in home.jsp
+            // var field = data.field;
+            // drawField(field);
+            // }
+        }
     }
-    if (xmlReq.readyState === 4)
-    {
-        // convert the responseText into JSON
-        var data = JSON.parse(xmlReq.responseText);
-
-        // display response for debugging purposes
-        $("#serverResponse").text(JSON.stringify(data));
-
-        if (!data.isSuccessful)
-        {
-            // could not move unit for some reason
-            // error message will be stored in errorMsg
-            // do something with it
-
-            var errorMsg = data.errorMsg;
-            alert(errorMsg);
-            return;
-        }
-
-        if (data.gameWon != null)
-        {
-            // do stuff for a victorious game
-        }
-        else if (data.gameLost != null)
-        {
-            // do stuff for a lost game
-        }
-        else if (data.playerNum != null)
-        {
-            // do stuff for a new game
-
-            var playerNum = data.playerNum;
-
-            // opponent's username, display this somewhere
-            var opponent = data.opponent;
-
-            // allow the user to choose starting positions, etc ...
-        }
-        else
-        {
-            // just do regular display action
-
-            // the 10x10 field will be stored in data.field.
-            // This will consist of a double array of characters, each corresponding some unit or
-            // tile to display, the mapping is defined in home.jsp
-            var field = data.field;
-            drawField(field);
-        }
-    }
+    xmlReq.send("data=" + JSON.stringify(JSONObjectToSend));
 }
 
 function quitGame()

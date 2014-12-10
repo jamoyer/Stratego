@@ -38,32 +38,27 @@ public class ResponseMessage
         {
             message.put("isSuccessful", isSuccessful);
             message.put("errorMsg", errorMsg);
-            if (position != null)
-            {
-                message.put("playerNum", position.getPlayerNumber());
-            }
-            else
-            {
-                message.put("playerNum", 0);
-            }
+            message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
             message.put("opponent", opponent);
             message.put("field", field);
             message.put("gameWon", gameWon);
             message.put("gameLost", gameLost);
-            if (turn != null)
-            {
-                message.put("currentTurn", turn.getPlayerNumber());
-            }
-            else
-            {
-                message.put("currentTurn", 0);
-            }
+            message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(turn));
         }
         catch (JSONException e)
         {
             e.printStackTrace();
         }
         return message.toString();
+    }
+
+    private static int convertPlayerPosToPlayerNum(final PlayerPosition pos)
+    {
+        if (pos != null)
+        {
+            return pos.getPlayerNumber();
+        }
+        return 0;
     }
 
     /**

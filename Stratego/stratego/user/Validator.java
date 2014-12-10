@@ -17,10 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet implementation class Validator
  */
+@SuppressWarnings("serial")
 @WebServlet("/Validator")
 public class Validator extends HttpServlet
 {
-    private static final long serialVersionUID = 1L;
+    private static final String CLASS_LOG = "Validator: ";
 
     private static final String DRIVER = "com.mysql.jdbc.Driver";
     private static final String DB_URL = "jdbc:mysql://localhost/stratego";
@@ -40,9 +41,14 @@ public class Validator extends HttpServlet
         super();
     }
 
+    private void logMsg(final String msg)
+    {
+        System.out.println(CLASS_LOG + msg);
+    }
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException
     {
         PrintWriter output = response.getWriter();
 
@@ -77,9 +83,10 @@ public class Validator extends HttpServlet
                 }
                 break;
             case "logout":
+                String user = (String) request.getSession().getAttribute("user");
                 request.getSession().setAttribute("user", null);
                 isSuccessful = true;
-                _responseMessage = "Logged out.";
+                _responseMessage = user + " logged out.";
                 break;
             default:
                 _responseMessage = "Invalid Action Type.";
@@ -94,7 +101,7 @@ public class Validator extends HttpServlet
         {
             _responseMessage = ERROR_MESSAGE + _responseMessage;
         }
-        System.out.println(_responseMessage);
+        logMsg(_responseMessage);
         response.sendRedirect("/Stratego/home.jsp");
     }
 
@@ -143,12 +150,12 @@ public class Validator extends HttpServlet
             // STEP 5: Extract data from result set
             if (rs.next() && username.equals(rs.getString("user")))
             {
-                _responseMessage = "Access Granted.";
+                _responseMessage = "Access Granted for " + username;
                 isSuccessful = true;
             }
             else
             {
-                _responseMessage = "Access Denied.";
+                _responseMessage = "Access Denied for " + username;
                 isSuccessful = false;
             }
 

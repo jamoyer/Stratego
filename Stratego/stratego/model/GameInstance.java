@@ -2,6 +2,8 @@ package stratego.model;
 
 public class GameInstance
 {
+    private static final String CLASS_LOG = "GameInstance: ";
+
     private String topPlayer = null;
     private long topPlayerLastResponseTime;
     private boolean topPlayerPositionsSet = false;
@@ -11,6 +13,7 @@ public class GameInstance
     private boolean bottomPlayerPositionsSet = false;
 
     private final long initiatedTime; // seconds
+    private long endTime; // seconds
 
     private Field field = null;
     private PlayerPosition winner = null;
@@ -200,8 +203,58 @@ public class GameInstance
         return grid;
     }
 
+    public char[][] getExposedFieldByPlayer(final String user)
+    {
+        return this.getExposedFieldByPlayer(this.getPlayerPosition(user));
+    }
+
+    /**
+     * Returns the grid of characters to display for a given player.
+     * 
+     * @param userPos
+     * @return
+     */
+    public char[][] getExposedFieldByPlayer(final PlayerPosition userPos)
+    {
+        char grid[][] = new char[Field.getRowCount()][Field.getColumnCount()];
+        for (int row = 0; row < Field.getRowCount(); row++)
+        {
+            for (int col = 0; col < Field.getColumnCount(); col++)
+            {
+                Position pos = new Position(row, col);
+                if (this.field.isObstacle(pos))
+                {
+                    grid[row][col] = TileSymbol.OBSTACLE.getSymbol();
+                    continue;
+                }
+
+                Unit unit = this.field.getUnitAt(pos);
+                if (unit == null)
+                {
+                    grid[row][col] = TileSymbol.EMPTY.getSymbol();
+                    continue;
+                }
+                if (unit.getPlayer().equals(userPos))
+                {
+                    grid[row][col] = unit.getType().getSymbol().getSymbol();
+                    continue;
+                }
+                else
+                {
+                    grid[row][col] = unit.getEnemyType().getSymbol();
+                    continue;
+                }
+            }
+        }
+        return grid;
+    }
+
     public String getWinnerName()
     {
+        if (this.winner == null)
+        {
+            return null;
+        }
         switch (this.winner)
         {
             case BOTTOM_PLAYER:
@@ -218,9 +271,12 @@ public class GameInstance
         return this.winner;
     }
 
-    public void setWinner(final PlayerPosition position)
+    public void setWinner(final PlayerPosition position, final long currentTimeSeconds)
     {
+        logMsg(getWinnerName() + " has won a game!");
         this.winner = position;
+        this.endTime = currentTimeSeconds;
+        this.currentTurn = null;
     }
 
     public String getOpponent(final String user)
@@ -352,5 +408,269 @@ public class GameInstance
             return PlayerPosition.TOP_PLAYER;
         }
         return PlayerPosition.BOTTOM_PLAYER;
+    }
+
+    public boolean isValidMove(ResponseMessage rspMsg, final String user, final Position source,
+            final Position destination, final boolean loggingOn, final boolean turnMatters)
+    {
+        if (rspMsg == null)
+        {
+            return false;
+        }
+        // make sure source position is valid
+        if (!Field.checkPositionIsWithinBounds(source))
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " entered an invalid source position.");
+            }
+
+            rspMsg.setErrorMsg("Unable to move unit: Source position is out of bounds.");
+            return false;
+        }
+
+        // make sure destination position is valid
+        if (!Field.checkPositionIsWithinBounds(destination))
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " entered an invalid destination position.");
+            }
+            rspMsg.setErrorMsg("Unable to move unit: Destination position is out of bounds.");
+            return false;
+        }
+
+        // make sure the game is still on
+        if (this.getWinner() != null)
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " cannot move unit because game is over");
+            }
+            rspMsg.setErrorMsg("Unable to move unit: game is over.");
+            return false;
+        }
+
+        PlayerPosition userPos = this.getPlayerPosition(user);
+
+        // don't let players move units if it isn't their turn
+        if (turnMatters && (userPos == null || !userPos.equals(this.getTurn())))
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " cannot move because it is not their turn.");
+            }
+            rspMsg.setErrorMsg("Unable to move unit, it is not " + user + "'s turn.");
+            return false;
+        }
+
+        // cannot move diagonally
+        if (destination.getRow() != source.getRow() && destination.getColumn() != source.getColumn())
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " tried to move diagonally.");
+            }
+            rspMsg.setErrorMsg("Unable to move unit, units cannot move diagonally");
+            return false;
+        }
+
+        Unit sourceUnit = this.getField().getUnitAt(source);
+
+        // make sure there is a unit at source
+        if (sourceUnit == null)
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " tile at source is not a unit.");
+            }
+            rspMsg.setErrorMsg("Unable to move unit, tile at source is not a unit.");
+            return false;
+        }
+
+        // make sure the unit belongs to the user
+        if (!userPos.equals(sourceUnit.getPlayer()))
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " does not own the unit at source");
+            }
+            rspMsg.setErrorMsg("Unable to move unit, unit does not belong to the user.");
+            return false;
+        }
+
+        // bombs and flags are not allowed to move
+        if (sourceUnit.getType().equals(UnitType.BOMB) || sourceUnit.getType().equals(UnitType.FLAG))
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " attempted to move an unmoveable unit.");
+            }
+            rspMsg.setErrorMsg("Unable to move unit, unit cannot move.");
+            return false;
+        }
+
+        Unit destUnit = this.getField().getUnitAt(destination);
+
+        // cannot move into an allied unit
+        if (destUnit != null && destUnit.getPlayer().equals(userPos))
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " attempted to move into an allied unit.");
+            }
+            rspMsg.setErrorMsg("Unable to move unit, destination is an allied unit.");
+            return false;
+        }
+
+        // cannot move into an obstacle
+        if (destUnit == null && this.getField().isObstacle(destination))
+        {
+            if (loggingOn)
+            {
+                logMsg(user + " attempted to move into an obstacle.");
+            }
+            rspMsg.setErrorMsg("Unable to move unit, destination is an obstacle.");
+            return false;
+        }
+
+        // unless the unit is a scout, it cannot move more than one tile away
+        // from the source
+        if (!sourceUnit.getType().equals(UnitType.SCOUT))
+        {
+            //@formatter:off
+            if(((source.getRow() == destination.getRow()) && 
+                (source.getColumn()+1 != destination.getColumn()) && 
+                (source.getColumn()-1 != destination.getColumn())) || 
+                    ((source.getColumn() == destination.getColumn()) && 
+                    (source.getRow()-1 != destination.getRow()) && 
+                    (source.getRow()+1 != destination.getRow())))
+            //@formatter:on
+            {
+                if (loggingOn)
+                {
+                    logMsg(user + " attempted to move a non-scout unit more than one tile away.");
+                }
+                rspMsg.setErrorMsg("Unable to move unit, unit cannot move more than one tile.");
+                return false;
+            }
+        }
+
+        // nothing wrong about this move, it is a valid move
+        return true;
+    }
+
+    private void logMsg(final String msg)
+    {
+        System.out.println(CLASS_LOG + msg);
+    }
+
+    /**
+     * Checks for a win by verifying that both players can still move. Sets the
+     * winner if there is a win. Does not check that both players have their
+     * flags. That is done when players move their pieces.
+     * 
+     * @param settingPositions
+     * 
+     * @return true if there is a winner, otherwise false
+     */
+    public boolean checkForWin(final long currentTimeSeconds)
+    {
+        // check if the winner is already set
+        if (getWinner() != null)
+        {
+            return true;
+        }
+
+        boolean topCanMove = false;
+        boolean bottomCanMove = false;
+
+        // loop through the entire grid
+        for (int row = 0; row < Field.getRowCount(); row++)
+        {
+            for (int col = 0; col < Field.getColumnCount(); col++)
+            {
+                Position pos = new Position(row, col);
+                Unit unit = field.getUnitAt(pos);
+
+                // only check units that can move
+                if (unit != null && !unit.getType().equals(UnitType.FLAG) && !unit.getType().equals(UnitType.BOMB))
+                {
+                    // only do the unit if the player has not passed yet.
+                    if ((!topCanMove && unit.getPlayer().equals(PlayerPosition.TOP_PLAYER))
+                            || (!bottomCanMove && unit.getPlayer().equals(PlayerPosition.BOTTOM_PLAYER)))
+                    {
+                        // check if the unit is allowed to move into any
+                        // adjacent squares
+
+                        // this also works for scouts because if they can't move
+                        // into an adjacent square they definitely won't be able
+                        // to move more than that
+                        for (int i = row - 1; i <= row + 1; i++)
+                        {
+                            for (int j = col - 1; j <= col + 1; j++)
+                            {
+                                // skip the position of the unit, we know that's
+                                // invalid
+                                if (i == row && j == col)
+                                {
+                                    continue;
+                                }
+
+                                // actually check if the unit can move into that
+                                // tile
+                                if (isValidMove(new ResponseMessage(), this.getPlayer(unit.getPlayer()), pos,
+                                                new Position(i, j), false, false))
+                                {
+                                    if (unit.getPlayer().equals(PlayerPosition.BOTTOM_PLAYER))
+                                    {
+                                        bottomCanMove = true;
+                                    }
+                                    else
+                                    {
+                                        topCanMove = true;
+                                    }
+
+                                    if (bottomCanMove && topCanMove)
+                                    {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // checks for both players being unable to move, in this case the loser
+        // is whoever's turn is next/ the winner is whoever just had a turn
+        if (!bottomCanMove && !topCanMove)
+        {
+            if (this.currentTurn.equals(PlayerPosition.BOTTOM_PLAYER))
+            {
+                setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds);
+            }
+            else
+            {
+                setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds);
+            }
+        }
+
+        // otherwise there is just a normal win
+        else if (bottomCanMove)
+        {
+            setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds);
+        }
+        else
+        {
+            setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds);
+        }
+        return true;
+    }
+
+    public long getEndTime()
+    {
+        return endTime;
     }
 }
