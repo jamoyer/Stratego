@@ -9,25 +9,62 @@
     else
     {
 %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Stratego - Login</title>
+	<meta charset=utf-8 />
+	<title>JSweeper</title>
+	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/index.css" />
+	<script src="/Stratego/js/jquery.min.js"></script>
+	<script src="/Stratego/js/jquery-ui.min.js"></script>
+	<script src="/Stratego/js/bootstrap.min.js"></script>
+	<script src="/Stratego/js/index.js"></script>
+	<script src="//use.typekit.net/qxl0nsj.js"></script>
+	<script>try{Typekit.load();}catch(e){}</script>
+	<!--[if IE]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
 </head>
 <body>
-    <h1>Welcome!</h1>
-    <h2>Please login or make an account.</h2>
-    <form action="/Stratego/Validator" method="post">
-        <h3>Login</h3>
-        <input type="hidden" name="actionType" value="login"></input>
-        <h4>Username</h4>
-        <input type="text" name="username"></input>
-        <h4>Password</h4>
-        <input type="password" name="password"></input>
-        <br> <br>
-        <input type="submit" value="Login"></input>
-    </form>
+	<div class="container-centered">
+		<div class="panel panel-default panel-login">
+			<div class="panel-body">
+				<div class="panel-heading">
+					<h1 class="title">Stratego</h1>
+				</div>
+				<form method="post" id="login">
+					<div class="alert alert-warning alert-dismissible" role="alert" id="error" style="display:none">
+						<button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						<div class="message"></div>
+					</div>
+				
+					<div class="form-group">
+						<label>Username</label> 
+						<input type="text" class="form-control" id="username" />
+					</div>
+					
+					<div class="form-group">
+						<label>Password</label>
+						<input type="password" class="form-control" id="password" />
+					</div>
+					
+					<div class="form-group" id="password_confirm" style="display: none;">
+						<label>Confirm Password</label>
+						<input type="password" class="form-control" />
+					</div>
+	
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" id="create_flag"> Create account
+						</label>
+					</div>
+					
+					<input type="submit" class="btn btn-primary" value="Log In" />
+				</form>
+			</div>
+		</div>
+	</div>
 </body>
 </html>
 <%

@@ -1,0 +1,278 @@
+*
+{
+	border: 0px;
+	padding: 0px;
+	margin: 0px;
+}
+
+input,
+select
+{
+    outline: none;
+}
+
+.clear
+{
+	clear: both;
+}
+
+.right
+{
+	float: right;
+}
+
+.left
+{
+	float: left;
+}
+
+img,
+a img
+{
+	border: 0px;
+	margin-bottom: 15px;
+}
+
+ul,
+ol
+{
+	margin: 0px 0px 15px 25px;
+	padding: 0px;
+}
+
+table
+{
+	margin-bottom: 15px;
+}
+
+body
+{
+	font-family: "myriad-pro", Arial, "Helvetica Neue", Helvetica, sans-serif;
+	font-weight: 400;
+	font-style: normal;
+	font-size: 16px;
+	background-color: #ffffff;
+}
+
+a,
+a:visited,
+a:active
+{
+	font-weight: 400;
+	text-decoration: none;
+	font-style: normal;
+	color: #006ca7;
+}
+
+a:hover
+{
+	text-decoration: underline;
+}
+
+p
+{
+	font-family: "myriad-pro", Arial, "Helvetica Neue", Helvetica, sans-serif;
+	font-style: normal;
+	font-weight: 400;
+	font-size: 16px;
+	margin-bottom: 20px;
+	color: #000000;
+	line-height: 150%;
+}
+
+h1,
+h2,
+h3,
+h4
+{
+	font-family: "myriad-pro", Arial, "Helvetica Neue", Helvetica, sans-serif;
+	margin-bottom: 15px;
+	font-style: normal;
+	color: #006ca7;
+	text-transform: uppercase;
+}
+
+h1
+{
+	font-size: 38px;
+	font-weight: 400;
+}
+
+h2
+{
+	font-size: 34px;
+	font-weight: 400;
+}
+
+h3
+{
+	font-size: 30px;
+	font-weight: 400;
+}
+
+h4
+{
+	font-size: 26px;
+	font-weight: 400;
+}
+
+.title { font-family: "gothic-open-shaded", Arial, "Helvetica Neue", Helvetica, sans-serif }
+
+/************************************/
+
+.panel-heading .title
+{
+	margin: 0px;
+	text-align: center
+}
+
+.panel-login
+{
+	box-shadow: rgba(200,200,200,0.7) 0 4px 10px -1px;
+}
+
+.container
+{
+	padding: 20px 0;
+}
+
+.container-centered
+{
+	margin: auto;
+	width: 310px;
+	height: 310px;
+	position: absolute;
+	top:0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	
+}
+
+.panel-highscores .list-group .list-group-item 
+{
+	border: 0;
+	color: #31708f;
+}
+
+body .row .panel-highscores .list-group .list-group-title
+{
+	font-weight: bold;
+	padding-bottom: 0px;
+	border-top: 1px solid #bce8f1;
+}
+
+body .row .panel-highscores .panel-heading
+{
+	border-bottom:0
+}
+
+.panel-highscores .list-group .list-group-item .right-align
+{
+	text-align: right
+}
+
+.navbar a.navbar-brand
+{
+	line-height: normal;
+	font-size: 30px;
+	padding: 11px 15px 9px 15px;
+}
+
+.navbar a,
+.navbar p
+{
+	font-size: 16px;
+	line-height: normal;
+}
+
+.panel-primary .panel-body { padding: 0 15px }
+
+/************************************/
+
+#jsweeper #GameControls
+{
+	border-bottom: 1px solid #428bca;
+}
+
+#jsweeper #GameControls .column
+{
+	text-align: center;
+}
+
+#jsweeper #GameControls .column p 
+{
+	margin: 0px
+}
+
+#jsweeper #JFaceButton
+{
+	display: block;
+	height: 26px;
+	width: 26px;
+	background-color: transparent;
+	background-repeat: no-repeat;
+}
+
+#jsweeper #JFaceButton:active { background-image: url('../img/DownSmiley.png') }
+#jsweeper .batman #JFaceButton:active { background-image: url('../img/batman/BatmanDownSmiley.png') }
+#jsweeper .shark #JFaceButton:active { background-image: url('../img/shark/SharkDownSmiley.png') }
+
+
+#jsweeper #JFaceButton span
+{
+	display: none;
+	text-indent: -9999px;
+}
+
+#jsweeper
+{
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	cursor: default;
+}
+
+#jsweeper .grid_row
+{
+	
+}
+
+#jsweeper .grid_col
+{
+	height: 16px;
+	width: 16px;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	float: left;
+	background-position: center center;
+}
+
+#jsweeper .grid_col span
+{
+	display: none;
+	text-indent: -9999px;
+}
+
+#minefield
+{
+	background-color: #e7e7e7;
+}
+
+#container-jsweeper .panel
+{
+	-webkit-border-bottom-right-radius: 0;
+	-webkit-border-bottom-left-radius: 0;
+	-moz-border-radius-bottomright: 0;
+	-moz-border-radius-bottomleft: 0;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+#AboutModalButton:hover
+{
+	cursor: pointer;
+}

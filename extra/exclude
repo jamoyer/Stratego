@@ -10,3 +10,4 @@
 /build
 *.class
 *.project
+.DS_Store
