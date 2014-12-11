@@ -256,15 +256,20 @@ public class Validator extends HttpServlet
             stmt.setString(1, username);
             stmt.setString(2, password);
 
-            if (stmt.executeUpdate() == 1)
+            try
             {
-                // success
-                rspMsg.setSuccessful(true);
-                rspMsg.setLogMsg("User: " + username + " created.\nAccess Granted for " + username);
-                isSuccessful = true;
+                if (stmt.executeUpdate() == 1)
+                {
+                    // success
+                    rspMsg.setSuccessful(true);
+                    rspMsg.setLogMsg("User: " + username + " created.\nAccess Granted for " + username);
+                    isSuccessful = true;
+                }
             }
-            else
+            catch (SQLException e)
             {
+                e.printStackTrace();
+
                 // failure
                 rspMsg.setSuccessful(false);
                 rspMsg.setLogMsg("User: " + username + " already exists.\nAccess Denied for " + username);
