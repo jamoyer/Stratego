@@ -26,12 +26,12 @@ $(document).ready(function() {
 					try
 					{
 						var response = jQuery.parseJSON(resultString);
-						if (response["id"] != null && response["id"] > 0)
+						if (response["isSuccessful"] != null && response["isSuccessful"] == true)
 						{
-							window.location.replace("home.php");
-						} else if (response["message"] != null && response["message"].length > 0)
+							window.location.replace("/Stratego/home.jsp");
+						} else if (response["logMsg"] != null && response["logMsg"].length > 0)
 						{
-							error(response["message"]);
+							error(response["logMsg"]);
 						} else
 							throw 500;
 						
