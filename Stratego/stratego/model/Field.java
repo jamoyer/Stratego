@@ -50,6 +50,11 @@ public class Field
         return this.getTileAt(pos).isObstacle();
     }
 
+    public boolean isEmpty(final Position pos)
+    {
+        return (this.getUnitAt(pos) == null) && !this.isObstacle(pos);
+    }
+
     public Unit getUnitAt(final Position pos)
     {
         return this.getTileAt(pos).getUnit();

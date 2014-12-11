@@ -273,10 +273,18 @@ public class GameInstance
 
     public void setWinner(final PlayerPosition position, final long currentTimeSeconds)
     {
-        logMsg(getWinnerName() + " has won a game!");
         this.winner = position;
         this.endTime = currentTimeSeconds;
         this.currentTurn = null;
+        logMsg(getWinnerName() + " has won a game!");
+        synchronized (this)
+        {
+            /*
+             * TODO: Remove this game from the AppContext, update the database
+             * with the game stats and continue the thread. Both threads will
+             * eventually exit and the game will end.
+             */
+        }
     }
 
     public String getOpponent(final String user)
@@ -551,130 +559,50 @@ public class GameInstance
                 {
                     logMsg(user + " attempted to move a non-scout unit more than one tile away.");
                 }
-                rspMsg.setLogMsg("Unable to move unit, unit cannot move more than one tile.");
+                rspMsg.setLogMsg("Unable to move unit, non-scout units cannot move more than one tile.");
                 return false;
             }
         }
         else
         {
-            if (source.getRow() == destination.getRow())
+            /*
+             * Need traverse the path between the souce and the destination and
+             * make sure that the unit is not running through non-empty tiles.
+             */
+
+            boolean movingVertical = (source.getRow() != destination.getRow());
+            int pathPos = source.getRow();
+            int pathEnd = destination.getRow();
+            int stationary = source.getColumn();
+            if (!movingVertical)
             {
-                int col = source.getColumn();
-                if (col < destination.getColumn())
-                {
-                    col += 1;
-                    while (col < destination.getColumn())
-                    {
-                        Position pos = new Position(source.getRow(), col);
-                        Unit unit = field.getUnitAt(pos);
-                        if (unit != null)
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through a unit.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
-                            return false;
-                        }
-                        else if (field.isObstacle(pos))
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through an obstacle.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through obstacles.");
-                            return false;
-                        }
-                        col++;
-                    }
-                }
-                else
-                {
-                    col -= 1;
-                    while (col > destination.getRow())
-                    {
-                        Position pos = new Position(source.getRow(), col);
-                        Unit unit = field.getUnitAt(pos);
-                        if (unit != null)
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through a unit.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
-                            return false;
-                        }
-                        else if (field.isObstacle(pos))
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through an obstacle.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other obstacles.");
-                            return false;
-                        }
-                        col--;
-                    }
-                }
+                stationary = source.getRow();
+                pathPos = source.getColumn();
+                pathEnd = destination.getColumn();
             }
-            else
+            // always traverse the path from least the position
+            if (pathPos > pathEnd)
             {
-                int row = source.getRow();
-                if (row < destination.getRow())
+                int temp = pathPos;
+                pathPos = pathEnd;
+                pathEnd = temp;
+            }
+
+            for (pathPos++; pathPos < pathEnd; pathPos++)
+            {
+                Position pos = new Position(pathPos, stationary);
+                if (!movingVertical)
                 {
-                    row += 1;
-                    while (row < destination.getRow())
-                    {
-                        Position pos = new Position(row, source.getColumn());
-                        Unit unit = field.getUnitAt(pos);
-                        if (unit != null)
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through a unit.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
-                            return false;
-                        }
-                        else if (field.isObstacle(pos))
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through an obstacle.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other obstacles.");
-                            return false;
-                        }
-                        row++;
-                    }
+                    pos = new Position(stationary, pathPos);
                 }
-                else
+                if (!field.isEmpty(pos))
                 {
-                    row -= 1;
-                    while (row > destination.getRow())
+                    if (loggingOn)
                     {
-                        Position pos = new Position(row, source.getColumn());
-                        Unit unit = field.getUnitAt(pos);
-                        if (unit != null)
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through a unit.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
-                            return false;
-                        }
-                        else if (field.isObstacle(pos))
-                        {
-                            if (loggingOn)
-                            {
-                                logMsg(user + " attempted to move a scout through an obstacle.");
-                            }
-                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other obstacles.");
-                            return false;
-                        }
-                        row--;
+                        logMsg(user + " attempted to move a scout through a non-empty tile.");
                     }
+                    rspMsg.setLogMsg("Unable to move unit, unit cannot move through non-empty tiles.");
+                    return false;
                 }
             }
         }
