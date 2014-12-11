@@ -11,3 +11,4 @@
 *.class
 *.project
 .DS_Store
+.gitignore
