@@ -54,14 +54,14 @@ public class GameInstanceController
                             if ((now - game.checkPlayerLastResponsetime(PlayerPosition.TOP_PLAYER)) > TIME_OUT_SECONDS
                                     && PlayerPosition.TOP_PLAYER.equals(game.getTurn()))
                             {
-                                game.setWinner(PlayerPosition.BOTTOM_PLAYER, now);
+                                game.setWinner(PlayerPosition.BOTTOM_PLAYER, now, true);
                                 logMsg("GameInstanceModerator: " + game.getWinnerName()
                                         + " has won a game due to opponent time out.");
                             }
                             else if ((now - game.checkPlayerLastResponsetime(PlayerPosition.BOTTOM_PLAYER)) > TIME_OUT_SECONDS
                                     && PlayerPosition.BOTTOM_PLAYER.equals(game.getTurn()))
                             {
-                                game.setWinner(PlayerPosition.TOP_PLAYER, now);
+                                game.setWinner(PlayerPosition.TOP_PLAYER, now, true);
                                 logMsg("GameInstanceModerator: " + game.getWinnerName()
                                         + " has won a game due to opponent time out.");
                             }
@@ -259,7 +259,7 @@ public class GameInstanceController
      * @param user
      * @param positions
      */
-    public void setPositions(PrintWriter output, ResponseMessage rspMsg, final String user, final char[][] positions)
+    public void setPositions(PrintWriter output, ResponseMessage rspMsg, final String user, final char[][] positions, String theme)
     {
         rspMsg.setSuccessful(false);
         GameInstance game = getGameByUser(user);
@@ -273,7 +273,7 @@ public class GameInstanceController
             output.flush();
             return;
         }
-
+        
         // update the response time
         game.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
 
@@ -344,6 +344,9 @@ public class GameInstanceController
             }
         }
 
+        logMsg("Setting theme to " + theme);
+        game.setPlayerTheme(userPos, theme);
+        
         // make sure unit counts are correct
         for (Integer count : unitCounts.values())
         {
@@ -432,6 +435,7 @@ public class GameInstanceController
             // Hurray, all starting positions are set, the combat may begin!
             logMsg(user + "'s positions are set and opponent: " + game.getOpponent(userPos)
                     + "'s positions are set. Waiting for moves.");
+            rspMsg.setOpponentTheme(game.getOpponentTheme(userPos));
 
             // the player that isn't going first needs to wait for the other
             // player to take their turn
@@ -649,7 +653,7 @@ public class GameInstanceController
             {
                 game.getField().setUnitAt(destination, sourceUnit);
                 game.getField().setUnitAt(source, null);
-                game.setWinner(userPos, Validator.currentTimeSeconds());
+                game.setWinner(userPos, Validator.currentTimeSeconds(), false);
             }
         }
 

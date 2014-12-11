@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import stratego.model.Field;
+import stratego.model.GameInstance;
 import stratego.model.Position;
 import stratego.model.ResponseMessage;
 import stratego.user.Validator;
@@ -80,6 +81,8 @@ public class GameControlThread extends Thread
         {
             e1.printStackTrace();
         }
+        
+        
         if (Validator.emptyString(actionType))
         {
             logMsg("No Action Type.");
@@ -100,6 +103,17 @@ public class GameControlThread extends Thread
                 break;
 
             case "setPositions":
+            	// check that theme is set
+                String theme = null;
+                try
+                {
+                    theme = requestParams.getString("theme");
+                }
+                catch (JSONException e1)
+                {
+                    e1.printStackTrace();
+                }
+            	
                 logMsg("Set Positions Request by user: " + user);
 
                 // get starting positions
@@ -129,7 +143,7 @@ public class GameControlThread extends Thread
                     break;
                 }
 
-                gameController.setPositions(output, rspMsg, user, field);
+                gameController.setPositions(output, rspMsg, user, field, theme);
 
                 AppContext.removeContext(user);
                 context.complete();
@@ -195,6 +209,18 @@ public class GameControlThread extends Thread
                 return;
 
             case "quitGame":
+            	//String user = (String) request.getSession().getAttribute("user");
+
+                // need to end any games this user is in
+                GameInstance game = AppContext.getGame(user);
+                if (game != null)
+                {
+                    // the opponent wins by default
+                    game.setWinner(GameInstance.negatePosition(game.getPlayerPosition(user)),
+                                   Validator.currentTimeSeconds(), true);
+                }
+                //isSuccessful = true;
+                rspMsg.setLogMsg(user + " quit!");
                 break;
 
             case "getCurrentGame":

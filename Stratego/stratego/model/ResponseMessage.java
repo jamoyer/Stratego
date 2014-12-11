@@ -23,6 +23,7 @@ public class ResponseMessage
     private boolean gameLost = false;
     private PlayerPosition turn = null;
     private GameInstance game = null;
+    private String opponentTheme = null;
 
     public ResponseMessage()
     {
@@ -44,6 +45,7 @@ public class ResponseMessage
             {
                 message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
                 message.put("opponent", game.getOpponent(position));
+                message.put("opponentTheme", game.getOpponentTheme(position));
                 message.put("gameWon", position.equals(game.getWinner()));
                 message.put("gameLost", GameInstance.negatePosition(position).equals(game.getWinner()));
                 message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(game.getTurn()));
@@ -52,6 +54,7 @@ public class ResponseMessage
             {
                 message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
                 message.put("opponent", opponent);
+                message.put("opponentTheme", opponentTheme);
                 message.put("gameWon", gameWon);
                 message.put("gameLost", gameLost);
                 message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(turn));
@@ -169,5 +172,10 @@ public class ResponseMessage
     public void setGameLost(boolean gameLost)
     {
         this.gameLost = gameLost;
+    }
+    
+    public void setOpponentTheme(String theme)
+    {
+    	this.opponentTheme = theme;
     }
 }

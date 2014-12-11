@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import stratego.controller.AppContext;
 import stratego.model.GameInstance;
 import stratego.model.ResponseMessage;
+import static stratego.database.DatabaseAccess.*;
 
 /**
  * Servlet implementation class Validator
@@ -26,12 +27,6 @@ import stratego.model.ResponseMessage;
 public class Validator extends HttpServlet
 {
     private static final String CLASS_LOG = "Validator: ";
-
-    private static final String DRIVER = "com.mysql.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://localhost/stratego";
-    private static final String USER = "root";
-    private static final String PASS = "rootpw";
-
     private static final String ERROR_MESSAGE = "ERROR: ";
     private static final String SUCCESS_MESSAGE = "SUCCESS: ";
 
@@ -95,7 +90,7 @@ public class Validator extends HttpServlet
                 {
                     // the opponent wins by default
                     game.setWinner(GameInstance.negatePosition(game.getPlayerPosition(user)),
-                                   Validator.currentTimeSeconds());
+                                   Validator.currentTimeSeconds(), true);
                 }
                 isSuccessful = true;
                 rspMsg.setLogMsg(user + " logged out.");

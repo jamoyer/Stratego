@@ -36,6 +36,8 @@
     <div>
         <button onclick="joinNewGame()">New Game</button>
         <button onclick="setStartPositions()">Set Start Positions</button>
+        <input type="text" id="theme"></input>
+        <button onclick="quitGame()">Quit Game</button>
         <h5>Source</h5>
         <p>Source Row</p>
         <input type="text" id="sourceRow"></input>

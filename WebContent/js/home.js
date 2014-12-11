@@ -16,15 +16,18 @@ function joinNewGame()
  */
 function setStartPositions()
 {
-    var startingPositions = [ [ 'F', 'B', 'B', 'B', 'B', 'B', 'B', 'S', '5', '9' ],
+    var startingPositions = [ [ '1', 'B', 'B', 'B', 'B', 'B', 'B', 'S', '5', '9' ],
             [ '9', '9', '9', '9', '9', '9', '8', '8', '8', '8' ],
             [ '8', '7', '7', '7', '7', '6', '6', '6', '6', '5' ],
-            [ '9', '5', '5', '4', '4', '4', '3', '3', '2', '1' ] ];
+            [ '9', '5', '5', '4', '4', '4', '3', '3', '2', 'F' ] ];
+    
+    var theme = document.getElementById('theme').value;
 
     var data =
     {
         actionType : "setPositions",
-        positions : JSON.stringify(startingPositions)
+        positions : JSON.stringify(startingPositions),
+        theme : theme
     };
 
     makeGameControlRequest(data);

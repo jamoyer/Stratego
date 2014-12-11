@@ -1,6 +1,12 @@
 package stratego.model;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import stratego.controller.AppContext;
+import static stratego.database.DatabaseAccess.*;
 
 public class GameInstance
 {
@@ -9,10 +15,12 @@ public class GameInstance
     private String topPlayer = null;
     private long topPlayerLastResponseTime;
     private boolean topPlayerPositionsSet = false;
+    private String topPlayerTheme = "classic";
 
     private String bottomPlayer = null;
     private long bottomPlayerLastResponseTime;
     private boolean bottomPlayerPositionsSet = false;
+    private String bottomPlayerTheme = "classic";
 
     private final long initiatedTime; // seconds
     private long endTime; // seconds
@@ -38,7 +46,7 @@ public class GameInstance
             this.battleRevealGrid = grid;
         }
     }
-
+    
     public char[][] getBattleRevealGrid()
     {
         synchronized (this)
@@ -77,6 +85,63 @@ public class GameInstance
         {
             return this.bottomPlayerLastResponseTime;
         }
+    }
+    
+    public String getPlayerTheme(final PlayerPosition userPos)
+    {
+    	if (userPos == null)
+        {
+            throw new IllegalArgumentException("userPos cannot be null");
+        }
+
+        if (userPos.equals(PlayerPosition.TOP_PLAYER))
+        {
+            return this.topPlayerTheme;
+        }
+        else
+        {
+            return this.bottomPlayerTheme;
+        }
+    }
+    
+    public String getOpponentTheme(final PlayerPosition userPos)
+    {
+    	if (userPos == null)
+        {
+            throw new IllegalArgumentException("userPos cannot be null");
+        }
+
+        if (userPos.equals(PlayerPosition.TOP_PLAYER))
+        {
+            return this.bottomPlayerTheme;
+        }
+        else
+        {
+            return this.topPlayerTheme;
+        }
+    }
+    
+    public void setPlayerTheme(final PlayerPosition userPos, String theme)
+    {
+    	String theTheme = null;
+    	switch(theme)
+    	{
+    		case "DBZ":
+    			theTheme = "DBZ";
+    			break;
+    		default:
+    			theTheme = "classic";
+    			break;
+    	}
+    	
+    	if (userPos.equals(PlayerPosition.TOP_PLAYER))
+		{
+    		topPlayerTheme = theTheme;
+		}
+    	else
+    	{
+    		bottomPlayerTheme = theTheme;
+    	}
     }
 
     public void setPlayerLastResponseTime(final String user, final long responseTime)
@@ -267,13 +332,30 @@ public class GameInstance
                 return null;
         }
     }
+    
+    public String getLoserName()
+    {
+        if (this.winner == null)
+        {
+            return null;
+        }
+        switch (this.winner)
+        {
+            case BOTTOM_PLAYER:
+                return this.topPlayer;
+            case TOP_PLAYER:
+                return this.bottomPlayer;
+            default:
+                return null;
+        }
+    }
 
     public PlayerPosition getWinner()
     {
         return this.winner;
     }
 
-    public void setWinner(final PlayerPosition position, final long currentTimeSeconds)
+    public void setWinner(final PlayerPosition position, final long currentTimeSeconds, final boolean defaultWin)
     {
         this.winner = position;
         this.endTime = currentTimeSeconds;
@@ -285,6 +367,96 @@ public class GameInstance
          * TODO: Update the database with the game stats and continue the
          * thread. Both threads will eventually exit and the game will end.
          */
+        if(!defaultWin)
+        {
+        	addHighScore(new ResponseMessage(), getWinnerName(), getLoserName(), getEndTime());
+        }
+    }
+    
+    private void addHighScore(ResponseMessage rspMsg, final String winner, final String loser, final long endTime)
+    {
+    	logMsg("Adding new hs");
+        boolean isSuccessful = false;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try
+        {
+            // STEP 2: Register JDBC driver
+            Class.forName(DRIVER);
+
+            // STEP 3: Open a connection
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            // STEP 4: Execute a prepared query
+            // prepared statements are better than escaping strings and
+            // guarantee there is no sql injection
+            String sql = "INSERT INTO highscores (winner, loser, endtime) VALUES (?, ?, ?)";
+            stmt = conn.prepareStatement(sql);
+            
+            stmt.setString(1, winner);
+            stmt.setString(2, loser);
+            stmt.setInt(3, (int) endTime);
+            
+            try
+            {
+                if (stmt.executeUpdate() == 1)
+                {
+                    // success
+                    rspMsg.setSuccessful(true);
+                    rspMsg.setLogMsg(winner +" defeated " + loser + "in " + endTime + "added to highscores");
+                    isSuccessful = true;
+                }
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+
+                // failure
+                rspMsg.setSuccessful(false);
+                rspMsg.setLogMsg("Bad Data");
+                isSuccessful = false;
+            }
+
+            // STEP 6: Clean-up environment
+            stmt.close();
+            conn.close();
+        }
+        catch (SQLException se)
+        {
+            // Handle errors for JDBC
+            se.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            // Handle errors for Class.forName
+            e.printStackTrace();
+        }
+        finally
+        {
+            // finally block used to close resources
+            try
+            {
+                if (stmt != null)
+                {
+                    stmt.close();
+                }
+            }
+            catch (SQLException se2)
+            {
+            }
+            try
+            {
+                if (conn != null)
+                {
+                    conn.close();
+                }
+            }
+            catch (SQLException se)
+            {
+                se.printStackTrace();
+            }
+        }
+        
     }
 
     public String getOpponent(final String user)
@@ -700,22 +872,22 @@ public class GameInstance
         {
             if (this.currentTurn.equals(PlayerPosition.BOTTOM_PLAYER))
             {
-                setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds);
+                setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, false);
             }
             else
             {
-                setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds);
+                setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, false);
             }
         }
 
         // otherwise there is just a normal win
         else if (bottomCanMove)
         {
-            setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds);
+            setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, false);
         }
         else
         {
-            setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds);
+            setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, false);
         }
         return true;
     }
