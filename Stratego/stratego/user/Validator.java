@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import stratego.controller.AppContext;
+import stratego.model.GameInstance;
 import stratego.model.ResponseMessage;
 
 /**
@@ -86,12 +88,15 @@ public class Validator extends HttpServlet
             case "logout":
                 String user = (String) request.getSession().getAttribute("user");
                 request.getSession().setAttribute("user", null);
+
                 // need to end any games this user is in
-                // GameInstance game = AppContext.getGame(user);
-                // if(game!=null)
-                // {
-                //
-                // }
+                GameInstance game = AppContext.getGame(user);
+                if (game != null)
+                {
+                    // the opponent wins by default
+                    game.setWinner(GameInstance.negatePosition(game.getPlayerPosition(user)),
+                                   Validator.currentTimeSeconds());
+                }
                 isSuccessful = true;
                 rspMsg.setLogMsg(user + " logged out.");
                 response.sendRedirect("/Stratego/login.jsp");

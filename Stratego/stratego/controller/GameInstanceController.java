@@ -15,7 +15,7 @@ import stratego.user.Validator;
 
 public class GameInstanceController
 {
-    // 10 minutes is the max time to queue for a new game
+    // 1 minute is the max time to queue for a new game
     private static final long MAX_QUEUE_TIME_TO_START_GAME_SECONDS = 60;
     private static final long THREAD_SLEEP_SECONDS = 1;
     private static final long MODERATOR_THREAD_SLEEP_SECONDS = 5;
@@ -51,13 +51,15 @@ public class GameInstanceController
                         if (game.getTopPlayer() != null)
                         {
 
-                            if ((now - game.checkPlayerLastResponsetime(PlayerPosition.TOP_PLAYER)) > TIME_OUT_SECONDS)
+                            if ((now - game.checkPlayerLastResponsetime(PlayerPosition.TOP_PLAYER)) > TIME_OUT_SECONDS
+                                    && PlayerPosition.TOP_PLAYER.equals(game.getTurn()))
                             {
                                 game.setWinner(PlayerPosition.BOTTOM_PLAYER, now);
                                 logMsg("GameInstanceModerator: " + game.getWinnerName()
                                         + " has won a game due to opponent time out.");
                             }
-                            else if ((now - game.checkPlayerLastResponsetime(PlayerPosition.BOTTOM_PLAYER)) > TIME_OUT_SECONDS)
+                            else if ((now - game.checkPlayerLastResponsetime(PlayerPosition.BOTTOM_PLAYER)) > TIME_OUT_SECONDS
+                                    && PlayerPosition.BOTTOM_PLAYER.equals(game.getTurn()))
                             {
                                 game.setWinner(PlayerPosition.TOP_PLAYER, now);
                                 logMsg("GameInstanceModerator: " + game.getWinnerName()
@@ -76,7 +78,7 @@ public class GameInstanceController
                 }
             }
         });
-        // gameModerator.start();
+        gameModerator.start();
     }
 
     /**

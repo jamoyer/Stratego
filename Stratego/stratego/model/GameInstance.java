@@ -1,5 +1,7 @@
 package stratego.model;
 
+import stratego.controller.AppContext;
+
 public class GameInstance
 {
     private static final String CLASS_LOG = "GameInstance: ";
@@ -277,14 +279,12 @@ public class GameInstance
         this.endTime = currentTimeSeconds;
         this.currentTurn = null;
         logMsg(getWinnerName() + " has won a game!");
-        synchronized (this)
-        {
-            /*
-             * TODO: Remove this game from the AppContext, update the database
-             * with the game stats and continue the thread. Both threads will
-             * eventually exit and the game will end.
-             */
-        }
+        AppContext.removeGame(topPlayer);
+        AppContext.removeGame(bottomPlayer);
+        /*
+         * TODO: Update the database with the game stats and continue the
+         * thread. Both threads will eventually exit and the game will end.
+         */
     }
 
     public String getOpponent(final String user)
