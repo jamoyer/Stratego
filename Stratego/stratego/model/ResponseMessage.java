@@ -22,6 +22,7 @@ public class ResponseMessage
     private boolean gameWon = false;
     private boolean gameLost = false;
     private PlayerPosition turn = null;
+    private GameInstance game = null;
 
     public ResponseMessage()
     {
@@ -38,18 +39,39 @@ public class ResponseMessage
         {
             message.put("isSuccessful", isSuccessful);
             message.put("logMsg", logMsg);
-            message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
-            message.put("opponent", opponent);
             message.put("field", field);
-            message.put("gameWon", gameWon);
-            message.put("gameLost", gameLost);
-            message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(turn));
+            if (game != null)
+            {
+                message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
+                message.put("opponent", game.getOpponent(position));
+                message.put("gameWon", position.equals(game.getWinner()));
+                message.put("gameLost", GameInstance.negatePosition(position).equals(game.getWinner()));
+                message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(game.getTurn()));
+            }
+            else
+            {
+                message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
+                message.put("opponent", opponent);
+                message.put("gameWon", gameWon);
+                message.put("gameLost", gameLost);
+                message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(turn));
+            }
         }
         catch (JSONException e)
         {
             e.printStackTrace();
         }
         return message.toString();
+    }
+
+    public void setGame(final GameInstance game, final String user)
+    {
+        if (game == null || user == null)
+        {
+            return;
+        }
+        this.game = game;
+        this.position = game.getPlayerPosition(user);
     }
 
     private static int convertPlayerPosToPlayerNum(final PlayerPosition pos)

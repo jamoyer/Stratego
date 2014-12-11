@@ -555,6 +555,129 @@ public class GameInstance
                 return false;
             }
         }
+        else
+        {
+            if (source.getRow() == destination.getRow())
+            {
+                int col = source.getColumn();
+                if (col < destination.getColumn())
+                {
+                    col += 1;
+                    while (col < destination.getColumn())
+                    {
+                        Position pos = new Position(source.getRow(), col);
+                        Unit unit = field.getUnitAt(pos);
+                        if (unit != null)
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through a unit.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
+                            return false;
+                        }
+                        else if (field.isObstacle(pos))
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through an obstacle.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through obstacles.");
+                            return false;
+                        }
+                        col++;
+                    }
+                }
+                else
+                {
+                    col -= 1;
+                    while (col > destination.getRow())
+                    {
+                        Position pos = new Position(source.getRow(), col);
+                        Unit unit = field.getUnitAt(pos);
+                        if (unit != null)
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through a unit.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
+                            return false;
+                        }
+                        else if (field.isObstacle(pos))
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through an obstacle.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other obstacles.");
+                            return false;
+                        }
+                        col--;
+                    }
+                }
+            }
+            else
+            {
+                int row = source.getRow();
+                if (row < destination.getRow())
+                {
+                    row += 1;
+                    while (row < destination.getRow())
+                    {
+                        Position pos = new Position(row, source.getColumn());
+                        Unit unit = field.getUnitAt(pos);
+                        if (unit != null)
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through a unit.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
+                            return false;
+                        }
+                        else if (field.isObstacle(pos))
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through an obstacle.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other obstacles.");
+                            return false;
+                        }
+                        row++;
+                    }
+                }
+                else
+                {
+                    row -= 1;
+                    while (row > destination.getRow())
+                    {
+                        Position pos = new Position(row, source.getColumn());
+                        Unit unit = field.getUnitAt(pos);
+                        if (unit != null)
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through a unit.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other units.");
+                            return false;
+                        }
+                        else if (field.isObstacle(pos))
+                        {
+                            if (loggingOn)
+                            {
+                                logMsg(user + " attempted to move a scout through an obstacle.");
+                            }
+                            rspMsg.setLogMsg("Unable to move unit, unit cannot move through other obstacles.");
+                            return false;
+                        }
+                        row--;
+                    }
+                }
+            }
+        }
 
         // nothing wrong about this move, it is a valid move
         return true;

@@ -181,6 +181,7 @@ public class GameInstanceController
         {
             logMsg(user + " is creating a new game.");
             game = new GameInstance(user, Validator.currentTimeSeconds());
+            rspMsg.setGame(game, user);
             AppContext.putGame(user, game);
             int waitingTime = 0;
 
@@ -260,6 +261,7 @@ public class GameInstanceController
     {
         rspMsg.setSuccessful(false);
         GameInstance game = getGameByUser(user);
+        rspMsg.setGame(game, user);
         // user has to be in a game
         if (game == null)
         {
@@ -502,7 +504,7 @@ public class GameInstanceController
     {
         rspMsg.setSuccessful(false);
         GameInstance game = getGameByUser(user);
-
+        rspMsg.setGame(game, user);
         // user has to be in a game
         if (game == null)
         {

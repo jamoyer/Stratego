@@ -86,6 +86,12 @@ public class Validator extends HttpServlet
             case "logout":
                 String user = (String) request.getSession().getAttribute("user");
                 request.getSession().setAttribute("user", null);
+                // need to end any games this user is in
+                // GameInstance game = AppContext.getGame(user);
+                // if(game!=null)
+                // {
+                //
+                // }
                 isSuccessful = true;
                 rspMsg.setLogMsg(user + " logged out.");
                 response.sendRedirect("/Stratego/login.jsp");
