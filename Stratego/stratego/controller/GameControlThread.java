@@ -198,6 +198,9 @@ public class GameControlThread extends Thread
                 break;
 
             case "getCurrentGame":
+                // should probably just do this in the home.jsp on page load,
+                // check to see if the player has a game running and return them
+                // the current version of the field.
                 break;
 
             default:
