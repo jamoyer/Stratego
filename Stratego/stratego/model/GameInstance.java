@@ -425,7 +425,7 @@ public class GameInstance
                 logMsg(user + " entered an invalid source position.");
             }
 
-            rspMsg.setErrorMsg("Unable to move unit: Source position is out of bounds.");
+            rspMsg.setLogMsg("Unable to move unit: Source position is out of bounds.");
             return false;
         }
 
@@ -436,7 +436,7 @@ public class GameInstance
             {
                 logMsg(user + " entered an invalid destination position.");
             }
-            rspMsg.setErrorMsg("Unable to move unit: Destination position is out of bounds.");
+            rspMsg.setLogMsg("Unable to move unit: Destination position is out of bounds.");
             return false;
         }
 
@@ -447,7 +447,7 @@ public class GameInstance
             {
                 logMsg(user + " cannot move unit because game is over");
             }
-            rspMsg.setErrorMsg("Unable to move unit: game is over.");
+            rspMsg.setLogMsg("Unable to move unit: game is over.");
             return false;
         }
 
@@ -460,7 +460,7 @@ public class GameInstance
             {
                 logMsg(user + " cannot move because it is not their turn.");
             }
-            rspMsg.setErrorMsg("Unable to move unit, it is not " + user + "'s turn.");
+            rspMsg.setLogMsg("Unable to move unit, it is not " + user + "'s turn.");
             return false;
         }
 
@@ -471,7 +471,7 @@ public class GameInstance
             {
                 logMsg(user + " tried to move diagonally.");
             }
-            rspMsg.setErrorMsg("Unable to move unit, units cannot move diagonally");
+            rspMsg.setLogMsg("Unable to move unit, units cannot move diagonally");
             return false;
         }
 
@@ -484,7 +484,7 @@ public class GameInstance
             {
                 logMsg(user + " tile at source is not a unit.");
             }
-            rspMsg.setErrorMsg("Unable to move unit, tile at source is not a unit.");
+            rspMsg.setLogMsg("Unable to move unit, tile at source is not a unit.");
             return false;
         }
 
@@ -495,7 +495,7 @@ public class GameInstance
             {
                 logMsg(user + " does not own the unit at source");
             }
-            rspMsg.setErrorMsg("Unable to move unit, unit does not belong to the user.");
+            rspMsg.setLogMsg("Unable to move unit, unit does not belong to the user.");
             return false;
         }
 
@@ -506,7 +506,7 @@ public class GameInstance
             {
                 logMsg(user + " attempted to move an unmoveable unit.");
             }
-            rspMsg.setErrorMsg("Unable to move unit, unit cannot move.");
+            rspMsg.setLogMsg("Unable to move unit, unit cannot move.");
             return false;
         }
 
@@ -519,7 +519,7 @@ public class GameInstance
             {
                 logMsg(user + " attempted to move into an allied unit.");
             }
-            rspMsg.setErrorMsg("Unable to move unit, destination is an allied unit.");
+            rspMsg.setLogMsg("Unable to move unit, destination is an allied unit.");
             return false;
         }
 
@@ -530,7 +530,7 @@ public class GameInstance
             {
                 logMsg(user + " attempted to move into an obstacle.");
             }
-            rspMsg.setErrorMsg("Unable to move unit, destination is an obstacle.");
+            rspMsg.setLogMsg("Unable to move unit, destination is an obstacle.");
             return false;
         }
 
@@ -551,7 +551,7 @@ public class GameInstance
                 {
                     logMsg(user + " attempted to move a non-scout unit more than one tile away.");
                 }
-                rspMsg.setErrorMsg("Unable to move unit, unit cannot move more than one tile.");
+                rspMsg.setLogMsg("Unable to move unit, unit cannot move more than one tile.");
                 return false;
             }
         }

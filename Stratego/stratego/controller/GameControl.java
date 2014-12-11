@@ -39,7 +39,7 @@ public class GameControl extends HttpServlet
             ResponseMessage rspMsg = new ResponseMessage();
             logMsg("User not logged in.");
             rspMsg.setSuccessful(false);
-            rspMsg.setErrorMsg("User not logged in.");
+            rspMsg.setLogMsg("User not logged in.");
             response.getWriter().print(rspMsg.getMessage());
             response.getWriter().flush();
             context.complete();

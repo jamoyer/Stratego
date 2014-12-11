@@ -165,7 +165,7 @@ public class GameInstanceController
         {
             logMsg(user + " already has a game running.");
             rspMsg.setSuccessful(false);
-            rspMsg.setErrorMsg("Cannot start new game, a game is already in progress.");
+            rspMsg.setLogMsg("Cannot start new game, a game is already in progress.");
             return;
         }
 
@@ -212,7 +212,7 @@ public class GameInstanceController
                     logMsg(user + "'s game has timed out while waiting for another player.");
                     AppContext.removeGame(user);
                     rspMsg.setSuccessful(false);
-                    rspMsg.setErrorMsg("Game timed out after " + MAX_QUEUE_TIME_TO_START_GAME_SECONDS
+                    rspMsg.setLogMsg("Game timed out after " + MAX_QUEUE_TIME_TO_START_GAME_SECONDS
                             + " seconds. There are probably no other players.");
                     return;
                 }
@@ -225,7 +225,7 @@ public class GameInstanceController
         {
             logMsg(user + "'s game failed the sanity check.");
             rspMsg.setSuccessful(false);
-            rspMsg.setErrorMsg("Game was null or had a missing player after setup.");
+            rspMsg.setLogMsg("Game was null or had a missing player after setup.");
             return;
         }
 
@@ -264,7 +264,7 @@ public class GameInstanceController
         if (game == null)
         {
             logMsg(user + " is not in a game.");
-            rspMsg.setErrorMsg("Unable to set positions: User is not in a game.");
+            rspMsg.setLogMsg("Unable to set positions: User is not in a game.");
             output.print(rspMsg.getMessage());
             output.flush();
             return;
@@ -277,7 +277,7 @@ public class GameInstanceController
         if (game.checkPlayerHasSetPositions(user))
         {
             logMsg(user + " has already set starting positions.");
-            rspMsg.setErrorMsg("Unable to set positions: Starting positions already set.");
+            rspMsg.setLogMsg("Unable to set positions: Starting positions already set.");
             output.print(rspMsg.getMessage());
             output.flush();
             return;
@@ -287,7 +287,7 @@ public class GameInstanceController
         if (positions.length != Field.getStartingPlayerRowCount() || positions[0].length != Field.getColumnCount())
         {
             logMsg(user + "'s positions are not the right size.");
-            rspMsg.setErrorMsg("Unable to set positions: Positions are not the right size.");
+            rspMsg.setLogMsg("Unable to set positions: Positions are not the right size.");
             output.print(rspMsg.getMessage());
             output.flush();
             return;
@@ -313,7 +313,7 @@ public class GameInstanceController
                 if (unitType == null)
                 {
                     logMsg(symbol + " does not correlate to a valid unit type.");
-                    rspMsg.setErrorMsg("Unable to set positions: " + symbol
+                    rspMsg.setLogMsg("Unable to set positions: " + symbol
                             + " does not correlate to a valid unit type.");
                     output.print(rspMsg.getMessage());
                     output.flush();
@@ -347,7 +347,7 @@ public class GameInstanceController
             if (count.intValue() != 0)
             {
                 logMsg("Cannot set positions for " + user + ", unit count is incorrect.");
-                rspMsg.setErrorMsg("Unable to set positions: unit count is incorrect.");
+                rspMsg.setLogMsg("Unable to set positions: unit count is incorrect.");
                 output.print(rspMsg.getMessage());
                 output.flush();
                 return;
@@ -508,7 +508,7 @@ public class GameInstanceController
         if (game == null)
         {
             logMsg(user + " is not in a game.");
-            rspMsg.setErrorMsg("Unable to move unit: User is not in a game.");
+            rspMsg.setLogMsg("Unable to move unit: User is not in a game.");
             output.print(rspMsg.getMessage());
             output.flush();
             return;
@@ -592,6 +592,10 @@ public class GameInstanceController
                 // enemy has a higher rank and attacker is defeated
                 else
                 {
+//                    if(sourceUnit.getType().equals(UnitType.SCOUT))
+//                    {
+//                        
+//                    }
                     game.getField().setUnitAt(source, destUnit);
                     game.getField().setUnitAt(destination, null);
                 }

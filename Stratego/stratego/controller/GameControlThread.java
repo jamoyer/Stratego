@@ -62,7 +62,7 @@ public class GameControlThread extends Thread
             logMsg("Request is incorrect format.");
             e1.printStackTrace();
             rspMsg.setSuccessful(false);
-            rspMsg.setErrorMsg("Request is incorrect format.");
+            rspMsg.setLogMsg("Request is incorrect format.");
             output.print(rspMsg.getMessage());
             output.flush();
             AppContext.removeContext(user);
@@ -84,7 +84,7 @@ public class GameControlThread extends Thread
         {
             logMsg("No Action Type.");
             rspMsg.setSuccessful(false);
-            rspMsg.setErrorMsg("No Action Type.");
+            rspMsg.setLogMsg("No Action Type.");
             output.print(rspMsg.getMessage());
             output.flush();
             AppContext.removeContext(user);
@@ -116,7 +116,7 @@ public class GameControlThread extends Thread
                 {
                     logMsg("Positions not set.");
                     rspMsg.setSuccessful(false);
-                    rspMsg.setErrorMsg("Positions not set correctly.");
+                    rspMsg.setLogMsg("Positions not set correctly.");
                     break;
                 }
 
@@ -125,7 +125,7 @@ public class GameControlThread extends Thread
                 {
                     logMsg("Field from positions is null.");
                     rspMsg.setSuccessful(false);
-                    rspMsg.setErrorMsg("Positions not set correctly.");
+                    rspMsg.setLogMsg("Positions not set correctly.");
                     break;
                 }
 
@@ -149,7 +149,7 @@ public class GameControlThread extends Thread
                 {
                     logMsg("source not set.");
                     rspMsg.setSuccessful(false);
-                    rspMsg.setErrorMsg("Source not set correctly.");
+                    rspMsg.setLogMsg("Source not set correctly.");
                     break;
                 }
 
@@ -166,7 +166,7 @@ public class GameControlThread extends Thread
                 {
                     logMsg("Destination not set.");
                     rspMsg.setSuccessful(false);
-                    rspMsg.setErrorMsg("Destination not set correctly.");
+                    rspMsg.setLogMsg("Destination not set correctly.");
                     break;
                 }
 
@@ -184,7 +184,7 @@ public class GameControlThread extends Thread
                     e.printStackTrace();
                     logMsg("Unable to parse JSON.");
                     rspMsg.setSuccessful(false);
-                    rspMsg.setErrorMsg("Unable to parse JSON");
+                    rspMsg.setLogMsg("Unable to parse JSON");
                     break;
                 }
 
@@ -202,7 +202,7 @@ public class GameControlThread extends Thread
 
             default:
                 rspMsg.setSuccessful(false);
-                rspMsg.setErrorMsg("Invalid Action Type.");
+                rspMsg.setLogMsg("Invalid Action Type.");
         }
 
         // prints the json response message

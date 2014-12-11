@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import stratego.model.ResponseMessage;
+
 /**
  * Servlet implementation class Validator
  */
@@ -34,7 +36,6 @@ public class Validator extends HttpServlet
     /*
      * Methods should put information in here for the client.
      */
-    private String _responseMessage;
 
     public Validator()
     {
@@ -64,19 +65,19 @@ public class Validator extends HttpServlet
         final String password = request.getParameter("password");
 
         // get a response based on the actiontype
-        _responseMessage = null;
+        ResponseMessage rspMsg = new ResponseMessage();
         boolean isSuccessful = false;
         switch (actionType)
         {
             case "login":
-                isSuccessful = validateUser(username, password);
+                isSuccessful = validateUser(rspMsg, username, password);
                 if (isSuccessful)
                 {
                     request.getSession().setAttribute("user", username);
                 }
                 break;
             case "signup":
-                isSuccessful = createUser(username, password);
+                isSuccessful = createUser(rspMsg, username, password);
                 if (isSuccessful)
                 {
                     request.getSession().setAttribute("user", username);
@@ -86,23 +87,26 @@ public class Validator extends HttpServlet
                 String user = (String) request.getSession().getAttribute("user");
                 request.getSession().setAttribute("user", null);
                 isSuccessful = true;
-                _responseMessage = user + " logged out.";
+                rspMsg.setLogMsg(user + " logged out.");
+                response.sendRedirect("/Stratego/login.jsp");
                 break;
             default:
-                _responseMessage = "Invalid Action Type.";
+                rspMsg.setSuccessful(false);
+                rspMsg.setLogMsg("Invalid Action Type.");
         }
 
         // send the response back to the client
         if (isSuccessful)
         {
-            _responseMessage = SUCCESS_MESSAGE + _responseMessage;
+            rspMsg.setLogMsg(SUCCESS_MESSAGE + rspMsg.getLogMsg());
+            logMsg(SUCCESS_MESSAGE + rspMsg.getLogMsg());
         }
         else
         {
-            _responseMessage = ERROR_MESSAGE + _responseMessage;
+            rspMsg.setLogMsg(ERROR_MESSAGE + rspMsg.getLogMsg());
+            logMsg(rspMsg.getLogMsg());
         }
-        logMsg(_responseMessage);
-        response.sendRedirect("/Stratego/home.jsp");
+        output.print(rspMsg.getMessage());
     }
 
     /**
@@ -111,18 +115,21 @@ public class Validator extends HttpServlet
      * 
      * @param username
      * @param password
+     * @param password2
      * @return true for success and false for failure of logging in.
      */
-    private boolean validateUser(final String username, final String password)
+    private boolean validateUser(ResponseMessage rspMsg, final String username, final String password)
     {
         if (emptyString(username))
         {
-            _responseMessage = "Username not set.";
+            rspMsg.setSuccessful(false);
+            rspMsg.setLogMsg("Username not set.");
             return false;
         }
         if (emptyString(password))
         {
-            _responseMessage = "Password not set.";
+            rspMsg.setSuccessful(false);
+            rspMsg.setLogMsg("Password not set.");
             return false;
         }
 
@@ -150,12 +157,14 @@ public class Validator extends HttpServlet
             // STEP 5: Extract data from result set
             if (rs.next() && username.equals(rs.getString("user")))
             {
-                _responseMessage = "Access Granted for " + username;
+                rspMsg.setSuccessful(true);
+                rspMsg.setLogMsg("Access Granted for " + username);
                 isSuccessful = true;
             }
             else
             {
-                _responseMessage = "Access Denied for " + username;
+                rspMsg.setSuccessful(false);
+                rspMsg.setLogMsg("Access Denied for " + username);
                 isSuccessful = false;
             }
 
@@ -202,21 +211,95 @@ public class Validator extends HttpServlet
         return isSuccessful;
     }
 
-    private boolean createUser(final String username, final String password)
+    private boolean createUser(ResponseMessage rspMsg, final String username, final String password)
     {
         if (emptyString(username))
         {
-            _responseMessage = "Username not set.";
+            rspMsg.setSuccessful(false);
+            rspMsg.setLogMsg("Username not set.");
             return false;
         }
         if (emptyString(password))
         {
-            _responseMessage = "Password not set.";
+            rspMsg.setSuccessful(false);
+            rspMsg.setLogMsg("Password not set.");
             return false;
         }
 
-        _responseMessage = "Action unimplemented at this time.";
-        return false;
+        boolean isSuccessful = false;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try
+        {
+            // STEP 2: Register JDBC driver
+            Class.forName(DRIVER);
+
+            // STEP 3: Open a connection
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+            // STEP 4: Execute a prepared query
+            // prepared statements are better than escaping strings and
+            // guarantee there is no sql injection
+            String sql = "INSERT INTO users (user, password) VALUES (?, ?)";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+
+            if (stmt.executeUpdate() == 1)
+            {
+                // success
+                rspMsg.setSuccessful(true);
+                rspMsg.setLogMsg("User: " + username + " created.\nAccess Granted for " + username);
+                isSuccessful = true;
+            }
+            else
+            {
+                // failure
+                rspMsg.setSuccessful(false);
+                rspMsg.setLogMsg("User: " + username + " already exists.\nAccess Denied for " + username);
+                isSuccessful = false;
+            }
+
+            // STEP 6: Clean-up environment
+            stmt.close();
+            conn.close();
+        }
+        catch (SQLException se)
+        {
+            // Handle errors for JDBC
+            se.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            // Handle errors for Class.forName
+            e.printStackTrace();
+        }
+        finally
+        {
+            // finally block used to close resources
+            try
+            {
+                if (stmt != null)
+                {
+                    stmt.close();
+                }
+            }
+            catch (SQLException se2)
+            {
+            }
+            try
+            {
+                if (conn != null)
+                {
+                    conn.close();
+                }
+            }
+            catch (SQLException se)
+            {
+                se.printStackTrace();
+            }
+        }
+        return isSuccessful;
     }
 
     public static boolean emptyString(final String string)

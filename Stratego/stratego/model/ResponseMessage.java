@@ -15,7 +15,7 @@ public class ResponseMessage
 {
     private JSONObject message = new JSONObject();
     private boolean isSuccessful = true;
-    private String errorMsg = null;
+    private String logMsg = null;
     private PlayerPosition position = null;
     private String opponent = null;
     private char[][] field = null;
@@ -37,7 +37,7 @@ public class ResponseMessage
         try
         {
             message.put("isSuccessful", isSuccessful);
-            message.put("errorMsg", errorMsg);
+            message.put("logMsg", logMsg);
             message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
             message.put("opponent", opponent);
             message.put("field", field);
@@ -87,9 +87,14 @@ public class ResponseMessage
      * 
      * @param errorMsg
      */
-    public void setErrorMsg(String errorMsg)
+    public void setLogMsg(String errorMsg)
     {
-        this.errorMsg = errorMsg;
+        this.logMsg = errorMsg;
+    }
+
+    public String getLogMsg()
+    {
+        return this.logMsg;
     }
 
     /**
