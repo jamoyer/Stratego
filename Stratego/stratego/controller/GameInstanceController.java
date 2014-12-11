@@ -313,8 +313,7 @@ public class GameInstanceController
                 if (unitType == null)
                 {
                     logMsg(symbol + " does not correlate to a valid unit type.");
-                    rspMsg.setLogMsg("Unable to set positions: " + symbol
-                            + " does not correlate to a valid unit type.");
+                    rspMsg.setLogMsg("Unable to set positions: " + symbol + " does not correlate to a valid unit type.");
                     output.print(rspMsg.getMessage());
                     output.flush();
                     return;
@@ -592,11 +591,37 @@ public class GameInstanceController
                 // enemy has a higher rank and attacker is defeated
                 else
                 {
-//                    if(sourceUnit.getType().equals(UnitType.SCOUT))
-//                    {
-//                        
-//                    }
-                    game.getField().setUnitAt(source, destUnit);
+                    game.getField().setUnitAt(source, null);
+                    // check if the enemy has moved more than one space to
+                    // attack this unit (this happens with scounts)
+                    if (source.getRow() == destination.getRow())
+                    {
+                        if (source.getColumn() <= destination.getColumn())
+                        {
+                            game.getField().setUnitAt(new Position(destination.getRow(), destination.getColumn() - 1),
+                                                      destUnit);
+                        }
+                        else
+                        {
+                            game.getField().setUnitAt(new Position(destination.getRow(), destination.getColumn() + 1),
+                                                      destUnit);
+                        }
+                    }
+                    // check if the enemy has moved more than one space to
+                    // attack this unit (this happens with scounts)
+                    else if (source.getColumn() == destination.getColumn())
+                    {
+                        if (source.getRow() < destination.getRow())
+                        {
+                            game.getField().setUnitAt(new Position(destination.getRow() - 1, destination.getColumn()),
+                                                      destUnit);
+                        }
+                        else
+                        {
+                            game.getField().setUnitAt(new Position(destination.getRow() + 1, destination.getColumn()),
+                                                      destUnit);
+                        }
+                    }
                     game.getField().setUnitAt(destination, null);
                 }
             }
