@@ -1,5 +1,6 @@
 package stratego.model;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -123,15 +124,19 @@ public class GameInstance
     
     public void setPlayerTheme(final PlayerPosition userPos, String theme)
     {
-    	String theTheme = null;
-    	switch(theme)
+    	String theTheme = "classic";
+    	File file = new File("../Stratego/WebContent/img/");
+    	String[] names = file.list();
+
+    	for(String name : names)
     	{
-    		case "DBZ":
-    			theTheme = "DBZ";
-    			break;
-    		default:
-    			theTheme = "classic";
-    			break;
+    	    if (new File("../Stratego/WebContent/img/" + name).isDirectory())
+    	    {
+    	    	if(theme.equals(name))
+    	    	{
+    	    		theTheme = name;
+    	    	}
+    	    }
     	}
     	
     	if (userPos.equals(PlayerPosition.TOP_PLAYER))
