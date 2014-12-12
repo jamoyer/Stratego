@@ -130,6 +130,7 @@ public class GameInstance
             if (new File("../Stratego/WebContent/img/" + name).isDirectory() && theme.equals(name))
             {
                 theTheme = name;
+                break;
             }
         }
 
