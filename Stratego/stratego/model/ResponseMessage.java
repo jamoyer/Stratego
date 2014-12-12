@@ -15,6 +15,7 @@ public class ResponseMessage
 {
     private JSONObject message = new JSONObject();
     private boolean isSuccessful = true;
+    private boolean isPingResponse = false;
     private String logMsg = null;
     private PlayerPosition position = null;
     private String opponent = null;
@@ -58,6 +59,7 @@ public class ResponseMessage
                 message.put("gameWon", gameWon);
                 message.put("gameLost", gameLost);
                 message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(turn));
+                message.put("isPingResponse", isPingResponse);
             }
         }
         catch (JSONException e)
@@ -173,9 +175,9 @@ public class ResponseMessage
     {
         this.gameLost = gameLost;
     }
-    
+
     public void setOpponentTheme(String theme)
     {
-    	this.opponentTheme = theme;
+        this.opponentTheme = theme;
     }
 }

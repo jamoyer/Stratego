@@ -81,8 +81,7 @@ public class GameControlThread extends Thread
         {
             e1.printStackTrace();
         }
-        
-        
+
         if (Validator.emptyString(actionType))
         {
             logMsg("No Action Type.");
@@ -103,24 +102,16 @@ public class GameControlThread extends Thread
                 break;
 
             case "setPositions":
-            	// check that theme is set
-                String theme = null;
-                try
-                {
-                    theme = requestParams.getString("theme");
-                }
-                catch (JSONException e1)
-                {
-                    e1.printStackTrace();
-                }
-            	
                 logMsg("Set Positions Request by user: " + user);
 
                 // get starting positions
                 String positions = null;
+                // get theme
+                String theme = null;
                 try
                 {
                     positions = requestParams.getString("positions");
+                    theme = requestParams.getString("theme");
                 }
                 catch (JSONException e1)
                 {
@@ -150,55 +141,10 @@ public class GameControlThread extends Thread
                 return;
 
             case "moveUnit":
-                String s = null;
-                try
+                Position source = getPositionFromRequest(rspMsg, "source", requestParams);
+                Position destination = getPositionFromRequest(rspMsg, "destination", requestParams);
+                if (source == null || destination == null)
                 {
-                    s = requestParams.getString("source");
-                }
-                catch (JSONException e2)
-                {
-                    e2.printStackTrace();
-                }
-                if (s == null || Validator.emptyString(s))
-                {
-                    logMsg("source not set.");
-                    rspMsg.setSuccessful(false);
-                    rspMsg.setLogMsg("Source not set correctly.");
-                    break;
-                }
-
-                String d = null;
-                try
-                {
-                    d = requestParams.getString("destination");
-                }
-                catch (JSONException e1)
-                {
-                    e1.printStackTrace();
-                }
-                if (d == null || Validator.emptyString(d))
-                {
-                    logMsg("Destination not set.");
-                    rspMsg.setSuccessful(false);
-                    rspMsg.setLogMsg("Destination not set correctly.");
-                    break;
-                }
-
-                Position source = null;
-                Position destination = null;
-                try
-                {
-                    JSONObject jsonSource = new JSONObject(s);
-                    source = new Position(jsonSource.getInt("row"), jsonSource.getInt("col"));
-                    JSONObject jsonDestination = new JSONObject(d);
-                    destination = new Position(jsonDestination.getInt("row"), jsonDestination.getInt("col"));
-                }
-                catch (JSONException e)
-                {
-                    e.printStackTrace();
-                    logMsg("Unable to parse JSON.");
-                    rspMsg.setSuccessful(false);
-                    rspMsg.setLogMsg("Unable to parse JSON");
                     break;
                 }
 
@@ -209,17 +155,14 @@ public class GameControlThread extends Thread
                 return;
 
             case "quitGame":
-            	//String user = (String) request.getSession().getAttribute("user");
-
                 // need to end any games this user is in
-                GameInstance game = AppContext.getGame(user);
-                if (game != null)
+                GameInstance gameToQuit = AppContext.getGame(user);
+                if (gameToQuit != null)
                 {
                     // the opponent wins by default
-                    game.setWinner(GameInstance.negatePosition(game.getPlayerPosition(user)),
-                                   Validator.currentTimeSeconds(), true);
+                    gameToQuit.setWinner(GameInstance.negatePosition(gameToQuit.getPlayerPosition(user)),
+                                         Validator.currentTimeSeconds(), true);
                 }
-                //isSuccessful = true;
                 rspMsg.setLogMsg(user + " quit!");
                 break;
 
@@ -227,6 +170,17 @@ public class GameControlThread extends Thread
                 // should probably just do this in the home.jsp on page load,
                 // check to see if the player has a game running and return them
                 // the current version of the field.
+                break;
+            case "ping":
+                // need to end any games this user is in
+                GameInstance gameToPing = AppContext.getGame(user);
+                if (gameToPing != null)
+                {
+                    // the opponent wins by default
+                    gameToPing.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
+                }
+                rspMsg.setSuccessful(true);
+                rspMsg.setLogMsg("Response time updated for " + user);
                 break;
 
             default:
@@ -239,6 +193,42 @@ public class GameControlThread extends Thread
         output.flush();
         AppContext.removeContext(user);
         context.complete();
+    }
+
+    private Position getPositionFromRequest(final ResponseMessage rspMsg, final String pos, final JSONObject json)
+    {
+        String temp = null;
+        try
+        {
+            temp = json.getString(pos);
+        }
+        catch (JSONException e2)
+        {
+            e2.printStackTrace();
+        }
+        if (temp == null || Validator.emptyString(temp))
+        {
+            logMsg(pos + " not set.");
+            rspMsg.setSuccessful(false);
+            rspMsg.setLogMsg(pos + " not set correctly.");
+            return null;
+        }
+
+        Position returnPos = null;
+        try
+        {
+            JSONObject jsonSource = new JSONObject(temp);
+            returnPos = new Position(jsonSource.getInt("row"), jsonSource.getInt("col"));
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+            logMsg("Unable to parse JSON.");
+            rspMsg.setSuccessful(false);
+            rspMsg.setLogMsg("Unable to parse JSON");
+            return null;
+        }
+        return returnPos;
     }
 
     private char[][] convertStringToField(final String positions)

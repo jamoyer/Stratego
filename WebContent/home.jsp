@@ -2,13 +2,10 @@
 <%@ page import="org.apache.commons.lang3.StringEscapeUtils;"%>
 <%
     String sessionUser = (String) session.getAttribute("user");
-    // Users must login before viewing the home page
-    if (sessionUser == null || sessionUser.isEmpty())
-    {
-        response.sendRedirect("/Stratego/login.jsp");
-    }
-    else
-    {
+			// Users must login before viewing the home page
+			if (sessionUser == null || sessionUser.isEmpty()) {
+				response.sendRedirect("/Stratego/login.jsp");
+			} else {
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -17,6 +14,18 @@
 <script src="/Stratego/js/jquery-2.1.1.min.js"></script>
 <script src="/Stratego/js/home.js"></script>
 <title>Stratego - Home</title>
+<script>
+    // this will ping the game server every 5 seconds and refresh the response time
+    function pingForever()
+    {
+        setTimeout(function()
+        {
+            pingGameControl();
+            pingForever();
+        }, 5000);
+    }
+    pingForever();
+</script>
 </head>
 <body>
     <h1>Welcome!</h1>

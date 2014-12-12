@@ -1,4 +1,16 @@
 /*
+ * Refreshes the last response time for the user's game.
+ */
+function pingGameControl()
+{
+    var data =
+    {
+        actionType : "ping"
+    };
+    makeGameControlRequest(data);
+}
+
+/*
  * Calls GameControl and attempts to join the user to a new game.
  */
 function joinNewGame()
@@ -20,7 +32,7 @@ function setStartPositions()
             [ '9', '9', '9', '9', '9', '9', '8', '8', '8', '8' ],
             [ '8', '7', '7', '7', '7', '6', '6', '6', '6', '5' ],
             [ '9', '5', '5', '4', '4', '4', '3', '3', '2', 'F' ] ];
-    
+
     var theme = document.getElementById('theme').value;
 
     var data =
@@ -129,7 +141,10 @@ function makeGameControlRequest(JSONObjectToSend)
             var data = parseGameControlResponse(xmlReq.responseText);
 
             // display response for debugging purposes
-            $("#serverResponse").text(JSON.stringify(data));
+            if (!data.isPingResponse)
+            {
+                $("#serverResponse").text(JSON.stringify(data));
+            }
 
             // if (!data.isSuccessful)
             // {
