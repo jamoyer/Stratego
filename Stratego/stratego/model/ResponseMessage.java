@@ -69,6 +69,11 @@ public class ResponseMessage
         return message.toString();
     }
 
+    public void setPingResponse(boolean isPingResponse)
+    {
+        this.isPingResponse = isPingResponse;
+    }
+
     public void setGame(final GameInstance game, final String user)
     {
         if (game == null || user == null)

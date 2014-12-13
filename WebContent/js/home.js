@@ -1,4 +1,16 @@
 /*
+ * Returns the status of the current game running for the user. 
+ * isSuccessful will be false if the user is not in a game.
+ */
+function getCurrentGame()
+{
+    var data =
+    {
+        actionType : "getCurrentGame"
+    };
+    makeGameControlRequest(data);
+}
+/*
  * Refreshes the last response time for the user's game.
  */
 function pingGameControl()
@@ -7,7 +19,14 @@ function pingGameControl()
     {
         actionType : "ping"
     };
-    makeGameControlRequest(data);
+    var xmlReq = new XMLHttpRequest();
+    xmlReq.open('POST', '/Stratego/GameControl', true);
+    xmlReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xmlReq.onreadystatechange = function()
+    {
+        // should try to detect if there is no response meaning that the connection is bad
+    }
+    xmlReq.send("data=" + JSON.stringify(data));
 }
 
 /*
@@ -113,7 +132,7 @@ function makeGameControlRequest(JSONObjectToSend)
             // convert the responseText into JSON
             var data = parseGameControlResponse(xmlReq.responseText);
 
-            // display response for debugging purposes
+            // display response for debugging purposes\
             $("#serverResponse").text(JSON.stringify(data));
 
             // if (!data.isSuccessful)
@@ -141,10 +160,7 @@ function makeGameControlRequest(JSONObjectToSend)
             var data = parseGameControlResponse(xmlReq.responseText);
 
             // display response for debugging purposes
-            if (!data.isPingResponse)
-            {
-                $("#serverResponse").text(JSON.stringify(data));
-            }
+            $("#serverResponse").text(JSON.stringify(data));
 
             // if (!data.isSuccessful)
             // {

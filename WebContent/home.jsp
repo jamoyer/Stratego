@@ -25,6 +25,9 @@
         }, 5000);
     }
     pingForever();
+
+    //returns the current game, if the user is in a game already
+    getCurrentGame();
 </script>
 </head>
 <body>

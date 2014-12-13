@@ -1,5 +1,10 @@
 package stratego.model;
 
+import static stratego.database.DatabaseAccess.DB_URL;
+import static stratego.database.DatabaseAccess.DRIVER;
+import static stratego.database.DatabaseAccess.PASS;
+import static stratego.database.DatabaseAccess.USER;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import stratego.controller.AppContext;
-import static stratego.database.DatabaseAccess.*;
 
 public class GameInstance
 {
@@ -81,7 +85,8 @@ public class GameInstance
         if (userPos.equals(PlayerPosition.TOP_PLAYER))
         {
             return this.topPlayerLastResponseTime;
-        } else
+        }
+        else
         {
             return this.bottomPlayerLastResponseTime;
         }
@@ -97,7 +102,8 @@ public class GameInstance
         if (userPos.equals(PlayerPosition.TOP_PLAYER))
         {
             return this.topPlayerTheme;
-        } else
+        }
+        else
         {
             return this.bottomPlayerTheme;
         }
@@ -113,7 +119,8 @@ public class GameInstance
         if (userPos.equals(PlayerPosition.TOP_PLAYER))
         {
             return this.bottomPlayerTheme;
-        } else
+        }
+        else
         {
             return this.topPlayerTheme;
         }
@@ -123,21 +130,28 @@ public class GameInstance
     {
         String theTheme = "classic";
         File file = new File("../Stratego/WebContent/img/");
-        String[] names = file.list();
-
-        for (String name : names)
+        if (file != null)
         {
-            if (new File("../Stratego/WebContent/img/" + name).isDirectory() && theme.equals(name))
+            String[] names = file.list();
+            if (names != null)
             {
-                theTheme = name;
-                break;
+                for (String name : names)
+                {
+                    logMsg("folder " + name);
+                    if (new File("../Stratego/WebContent/img/" + name).isDirectory() && name.equals(theme))
+                    {
+                        theTheme = name;
+                        break;
+                    }
+                }
             }
         }
 
         if (userPos.equals(PlayerPosition.TOP_PLAYER))
         {
             topPlayerTheme = theTheme;
-        } else
+        }
+        else
         {
             bottomPlayerTheme = theTheme;
         }
@@ -258,7 +272,8 @@ public class GameInstance
                 {
                     grid[row][col] = unit.getType().getSymbol().getSymbol();
                     continue;
-                } else
+                }
+                else
                 {
                     grid[row][col] = TileSymbol.ENEMY_COVERED.getSymbol();
                     continue;
@@ -303,7 +318,8 @@ public class GameInstance
                 {
                     grid[row][col] = unit.getType().getSymbol().getSymbol();
                     continue;
-                } else
+                }
+                else
                 {
                     grid[row][col] = unit.getEnemyType().getSymbol();
                     continue;
@@ -352,8 +368,7 @@ public class GameInstance
         return this.winner;
     }
 
-    public void setWinner(final PlayerPosition position, final long currentTimeSeconds,
-            final boolean defaultWin)
+    public void setWinner(final PlayerPosition position, final long currentTimeSeconds, final boolean defaultWin)
     {
         this.winner = position;
         this.endTime = currentTimeSeconds;
@@ -371,8 +386,7 @@ public class GameInstance
         }
     }
 
-    private void addHighScore(ResponseMessage rspMsg, final String winner, final String loser,
-            final long endTime)
+    private void addHighScore(ResponseMessage rspMsg, final String winner, final String loser, final long endTime)
     {
         logMsg("Adding new hs");
         boolean isSuccessful = false;
@@ -402,8 +416,7 @@ public class GameInstance
                 {
                     // success
                     rspMsg.setSuccessful(true);
-                    rspMsg.setLogMsg(winner + " defeated " + loser + "in " + endTime
-                            + "added to highscores");
+                    rspMsg.setLogMsg(winner + " defeated " + loser + "in " + endTime + "added to highscores");
                     isSuccessful = true;
                 }
             }
@@ -734,7 +747,8 @@ public class GameInstance
                 rspMsg.setLogMsg("Unable to move unit, non-scout units cannot move more than one tile.");
                 return false;
             }
-        } else
+        }
+        else
         {
             /*
              * Need traverse the path between the souce and the destination and
@@ -816,8 +830,7 @@ public class GameInstance
                 Unit unit = field.getUnitAt(pos);
 
                 // only check units that can move
-                if (unit != null && !unit.getType().equals(UnitType.FLAG)
-                        && !unit.getType().equals(UnitType.BOMB))
+                if (unit != null && !unit.getType().equals(UnitType.FLAG) && !unit.getType().equals(UnitType.BOMB))
                 {
                     // only do the unit if the player has not passed yet.
                     if ((!topCanMove && unit.getPlayer().equals(PlayerPosition.TOP_PLAYER))
@@ -842,13 +855,14 @@ public class GameInstance
 
                                 // actually check if the unit can move into that
                                 // tile
-                                if (isValidMove(new ResponseMessage(), this.getPlayer(unit.getPlayer()),
-                                        pos, new Position(i, j), false, false))
+                                if (isValidMove(new ResponseMessage(), this.getPlayer(unit.getPlayer()), pos,
+                                                new Position(i, j), false, false))
                                 {
                                     if (unit.getPlayer().equals(PlayerPosition.BOTTOM_PLAYER))
                                     {
                                         bottomCanMove = true;
-                                    } else
+                                    }
+                                    else
                                     {
                                         topCanMove = true;
                                     }
@@ -872,7 +886,8 @@ public class GameInstance
             if (this.currentTurn.equals(PlayerPosition.BOTTOM_PLAYER))
             {
                 setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, false);
-            } else
+            }
+            else
             {
                 setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, false);
             }
@@ -882,7 +897,8 @@ public class GameInstance
         else if (bottomCanMove)
         {
             setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, false);
-        } else
+        }
+        else
         {
             setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, false);
         }

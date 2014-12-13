@@ -259,7 +259,8 @@ public class GameInstanceController
      * @param user
      * @param positions
      */
-    public void setPositions(PrintWriter output, ResponseMessage rspMsg, final String user, final char[][] positions, String theme)
+    public void setPositions(PrintWriter output, ResponseMessage rspMsg, final String user, final char[][] positions,
+            String theme)
     {
         rspMsg.setSuccessful(false);
         GameInstance game = getGameByUser(user);
@@ -273,7 +274,7 @@ public class GameInstanceController
             output.flush();
             return;
         }
-        
+
         // update the response time
         game.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
 
@@ -346,7 +347,7 @@ public class GameInstanceController
 
         logMsg("Setting theme to " + theme);
         game.setPlayerTheme(userPos, theme);
-        
+
         // make sure unit counts are correct
         for (Integer count : unitCounts.values())
         {

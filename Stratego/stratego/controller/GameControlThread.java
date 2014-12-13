@@ -167,19 +167,37 @@ public class GameControlThread extends Thread
                 break;
 
             case "getCurrentGame":
-                // should probably just do this in the home.jsp on page load,
-                // check to see if the player has a game running and return them
-                // the current version of the field.
+                // need to get the game this user is in and set the rspmsg
+                GameInstance currentGame = AppContext.getGame(user);
+                if (currentGame != null)
+                {
+                    rspMsg.setSuccessful(true);
+                    rspMsg.setGame(currentGame, user);
+                    if(currentGame.getWinner() == null)
+                    {
+                        rspMsg.setField(currentGame.getFieldSymbolsByPlayer(user));
+                    }
+                    else
+                    {
+                        rspMsg.setField(currentGame.getExposedFieldByPlayer(user));
+                    }
+                }
+                else
+                {
+                    rspMsg.setSuccessful(false);
+                    rspMsg.setLogMsg("There is no game for " + user);
+                }
                 break;
+
             case "ping":
                 // need to end any games this user is in
                 GameInstance gameToPing = AppContext.getGame(user);
                 if (gameToPing != null)
                 {
-                    // the opponent wins by default
                     gameToPing.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
                 }
                 rspMsg.setSuccessful(true);
+                rspMsg.setPingResponse(true);
                 rspMsg.setLogMsg("Response time updated for " + user);
                 break;
 
