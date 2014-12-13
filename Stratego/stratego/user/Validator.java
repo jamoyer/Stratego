@@ -2,8 +2,6 @@ package stratego.user;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,11 +12,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import stratego.controller.AppContext;
+import stratego.AppContext;
+import stratego.controller.GameControlMessage;
+import stratego.database.DatabaseAccess;
 import stratego.model.GameEnd;
 import stratego.model.GameInstance;
-import stratego.model.ResponseMessage;
-import static stratego.database.DatabaseAccess.*;
 
 /**
  * Servlet implementation class Validator
@@ -63,7 +61,7 @@ public class Validator extends HttpServlet
         final String password = request.getParameter("password");
 
         // get a response based on the actiontype
-        ResponseMessage rspMsg = new ResponseMessage();
+        GameControlMessage rspMsg = new GameControlMessage();
         boolean isSuccessful = false;
         switch (actionType)
         {
@@ -125,7 +123,7 @@ public class Validator extends HttpServlet
      * @param password2
      * @return true for success and false for failure of logging in.
      */
-    private boolean validateUser(ResponseMessage rspMsg, final String username, final String password)
+    private boolean validateUser(GameControlMessage rspMsg, final String username, final String password)
     {
         if (emptyString(username))
         {
@@ -141,21 +139,11 @@ public class Validator extends HttpServlet
         }
 
         boolean isSuccessful = false;
-        Connection conn = null;
         PreparedStatement stmt = null;
         try
         {
-            // STEP 2: Register JDBC driver
-            Class.forName(DRIVER);
-
-            // STEP 3: Open a connection
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
-            // STEP 4: Execute a prepared query
-            // prepared statements are better than escaping strings and
-            // guarantee there is no sql injection
             String sql = "SELECT user FROM users WHERE user=? AND password=?";
-            stmt = conn.prepareStatement(sql);
+            stmt = DatabaseAccess.prepareSQL(sql);
             stmt.setString(1, username);
             stmt.setString(2, password);
 
@@ -178,47 +166,16 @@ public class Validator extends HttpServlet
             // STEP 6: Clean-up environment
             rs.close();
             stmt.close();
-            conn.close();
         }
-        catch (SQLException se)
+        catch (SQLException e)
         {
-            // Handle errors for JDBC
-            se.printStackTrace();
-        }
-        catch (Exception e)
-        {
-            // Handle errors for Class.forName
             e.printStackTrace();
         }
-        finally
-        {
-            // finally block used to close resources
-            try
-            {
-                if (stmt != null)
-                {
-                    stmt.close();
-                }
-            }
-            catch (SQLException se2)
-            {
-            }
-            try
-            {
-                if (conn != null)
-                {
-                    conn.close();
-                }
-            }
-            catch (SQLException se)
-            {
-                se.printStackTrace();
-            }
-        }
+
         return isSuccessful;
     }
 
-    private boolean createUser(ResponseMessage rspMsg, final String username, final String password)
+    private boolean createUser(GameControlMessage rspMsg, final String username, final String password)
     {
         if (emptyString(username))
         {
@@ -234,21 +191,11 @@ public class Validator extends HttpServlet
         }
 
         boolean isSuccessful = false;
-        Connection conn = null;
         PreparedStatement stmt = null;
         try
         {
-            // STEP 2: Register JDBC driver
-            Class.forName(DRIVER);
-
-            // STEP 3: Open a connection
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
-            // STEP 4: Execute a prepared query
-            // prepared statements are better than escaping strings and
-            // guarantee there is no sql injection
             String sql = "INSERT INTO users (user, password, score) VALUES (?, ?, 0)";
-            stmt = conn.prepareStatement(sql);
+            stmt = DatabaseAccess.prepareSQL(sql);
             stmt.setString(1, username);
             stmt.setString(2, password);
 
@@ -274,43 +221,13 @@ public class Validator extends HttpServlet
 
             // STEP 6: Clean-up environment
             stmt.close();
-            conn.close();
         }
         catch (SQLException se)
         {
             // Handle errors for JDBC
             se.printStackTrace();
         }
-        catch (Exception e)
-        {
-            // Handle errors for Class.forName
-            e.printStackTrace();
-        }
-        finally
-        {
-            // finally block used to close resources
-            try
-            {
-                if (stmt != null)
-                {
-                    stmt.close();
-                }
-            }
-            catch (SQLException se2)
-            {
-            }
-            try
-            {
-                if (conn != null)
-                {
-                    conn.close();
-                }
-            }
-            catch (SQLException se)
-            {
-                se.printStackTrace();
-            }
-        }
+
         return isSuccessful;
     }
 

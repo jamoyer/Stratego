@@ -4,12 +4,12 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Random;
 
+import stratego.AppContext;
 import stratego.model.Field;
 import stratego.model.GameEnd;
 import stratego.model.GameInstance;
 import stratego.model.PlayerPosition;
 import stratego.model.Position;
-import stratego.model.ResponseMessage;
 import stratego.model.Unit;
 import stratego.model.UnitType;
 import stratego.user.Validator;
@@ -160,7 +160,7 @@ public class GameInstanceController
      * @param user
      *            The user's username.
      */
-    public void newGame(final ResponseMessage rspMsg, final String user)
+    public void newGame(final GameControlMessage rspMsg, final String user)
     {
         logMsg("Processing newGame request");
         // check if the user is currently in a game
@@ -260,7 +260,7 @@ public class GameInstanceController
      * @param user
      * @param positions
      */
-    public void setPositions(PrintWriter output, ResponseMessage rspMsg, final String user, final char[][] positions,
+    public void setPositions(PrintWriter output, GameControlMessage rspMsg, final String user, final char[][] positions,
             String theme)
     {
         rspMsg.setSuccessful(false);
@@ -445,7 +445,7 @@ public class GameInstanceController
         }
     }
 
-    private void waitForPlayersTurn(final PrintWriter output, final ResponseMessage rspMsg, final GameInstance game,
+    private void waitForPlayersTurn(final PrintWriter output, final GameControlMessage rspMsg, final GameInstance game,
             final PlayerPosition userPos)
     {
         if (game.getTurn() == null || game.getTurn().equals(userPos))
@@ -507,7 +507,7 @@ public class GameInstanceController
         output.flush();
     }
 
-    public void moveUnit(PrintWriter output, ResponseMessage rspMsg, final String user, final Position source,
+    public void moveUnit(PrintWriter output, GameControlMessage rspMsg, final String user, final Position source,
             final Position destination)
     {
         rspMsg.setSuccessful(false);

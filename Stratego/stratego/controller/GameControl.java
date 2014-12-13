@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import stratego.model.ResponseMessage;
+import stratego.AppContext;
 import stratego.user.Validator;
 
 /**
@@ -36,7 +36,7 @@ public class GameControl extends HttpServlet
         final String user = (String) request.getSession().getAttribute("user");
         if (Validator.emptyString(user))
         {
-            ResponseMessage rspMsg = new ResponseMessage();
+            GameControlMessage rspMsg = new GameControlMessage();
             logMsg("User not logged in.");
             rspMsg.setSuccessful(false);
             rspMsg.setLogMsg("User not logged in.");

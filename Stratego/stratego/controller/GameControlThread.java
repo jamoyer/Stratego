@@ -11,11 +11,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import stratego.AppContext;
 import stratego.model.Field;
 import stratego.model.GameEnd;
 import stratego.model.GameInstance;
 import stratego.model.Position;
-import stratego.model.ResponseMessage;
 import stratego.user.Validator;
 
 public class GameControlThread extends Thread
@@ -51,7 +51,7 @@ public class GameControlThread extends Thread
             e1.printStackTrace();
             return;
         }
-        ResponseMessage rspMsg = new ResponseMessage();
+        GameControlMessage rspMsg = new GameControlMessage();
         final String user = (String) request.getSession().getAttribute("user");
 
         JSONObject requestParams = null;
@@ -214,7 +214,7 @@ public class GameControlThread extends Thread
         context.complete();
     }
 
-    private Position getPositionFromRequest(final ResponseMessage rspMsg, final String pos, final JSONObject json)
+    private Position getPositionFromRequest(final GameControlMessage rspMsg, final String pos, final JSONObject json)
     {
         String temp = null;
         try

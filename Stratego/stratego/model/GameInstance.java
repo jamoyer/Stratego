@@ -1,17 +1,9 @@
 package stratego.model;
 
-import static stratego.database.DatabaseAccess.DB_URL;
-import static stratego.database.DatabaseAccess.DRIVER;
-import static stratego.database.DatabaseAccess.PASS;
-import static stratego.database.DatabaseAccess.USER;
-
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
-import stratego.controller.AppContext;
+import stratego.AppContext;
+import stratego.controller.GameControlMessage;
 
 public class GameInstance
 {
@@ -510,7 +502,7 @@ public class GameInstance
         return PlayerPosition.BOTTOM_PLAYER;
     }
 
-    public boolean isValidMove(ResponseMessage rspMsg, final String user, final Position source,
+    public boolean isValidMove(GameControlMessage rspMsg, final String user, final Position source,
             final Position destination, final boolean loggingOn, final boolean turnMatters)
     {
         if (rspMsg == null)
@@ -762,7 +754,7 @@ public class GameInstance
 
                                 // actually check if the unit can move into that
                                 // tile
-                                if (isValidMove(new ResponseMessage(), this.getPlayer(unit.getPlayer()), pos,
+                                if (isValidMove(new GameControlMessage(), this.getPlayer(unit.getPlayer()), pos,
                                                 new Position(i, j), false, false))
                                 {
                                     if (unit.getPlayer().equals(PlayerPosition.BOTTOM_PLAYER))

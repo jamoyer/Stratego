@@ -1,7 +1,10 @@
-package stratego.model;
+package stratego.controller;
 
 import org.json.JSONException;
-import org.json.JSONObject;
+
+import stratego.ResponseMessage;
+import stratego.model.GameInstance;
+import stratego.model.PlayerPosition;
 
 /**
  * This class should be used for all responses from calls to GameControl so that
@@ -11,12 +14,9 @@ import org.json.JSONObject;
  * @author Jacob Moyer
  *
  */
-public class ResponseMessage
+public class GameControlMessage extends ResponseMessage
 {
-    private JSONObject message = new JSONObject();
-    private boolean isSuccessful = true;
     private boolean isPingResponse = false;
-    private String logMsg = null;
     private PlayerPosition position = null;
     private String opponent = null;
     private char[][] field = null;
@@ -26,7 +26,7 @@ public class ResponseMessage
     private GameInstance game = null;
     private String opponentTheme = null;
 
-    public ResponseMessage()
+    public GameControlMessage()
     {
     }
 
@@ -35,6 +35,7 @@ public class ResponseMessage
      * 
      * @return
      */
+    @Override
     public String getMessage()
     {
         try
@@ -44,21 +45,21 @@ public class ResponseMessage
             message.put("field", field);
             if (game != null)
             {
-                message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
+                message.put("playerNum", GameControlMessage.convertPlayerPosToPlayerNum(position));
                 message.put("opponent", game.getOpponent(position));
                 message.put("opponentTheme", game.getOpponentTheme(position));
                 message.put("gameWon", position.equals(game.getWinner()));
                 message.put("gameLost", GameInstance.negatePosition(position).equals(game.getWinner()));
-                message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(game.getTurn()));
+                message.put("currentTurn", GameControlMessage.convertPlayerPosToPlayerNum(game.getTurn()));
             }
             else
             {
-                message.put("playerNum", ResponseMessage.convertPlayerPosToPlayerNum(position));
+                message.put("playerNum", GameControlMessage.convertPlayerPosToPlayerNum(position));
                 message.put("opponent", opponent);
                 message.put("opponentTheme", opponentTheme);
                 message.put("gameWon", gameWon);
                 message.put("gameLost", gameLost);
-                message.put("currentTurn", ResponseMessage.convertPlayerPosToPlayerNum(turn));
+                message.put("currentTurn", GameControlMessage.convertPlayerPosToPlayerNum(turn));
                 message.put("isPingResponse", isPingResponse);
             }
         }
@@ -101,27 +102,6 @@ public class ResponseMessage
     public void setTurn(PlayerPosition turn)
     {
         this.turn = turn;
-    }
-
-    /**
-     * Whether or not this action worked.
-     * 
-     * @param isSuccessful
-     */
-    public void setSuccessful(boolean isSuccessful)
-    {
-        this.isSuccessful = isSuccessful;
-    }
-
-    /**
-     * The message to return if the action did not work. Should be set if and
-     * only if isSuccessful is false.
-     * 
-     * @param errorMsg
-     */
-    public void setLogMsg(String errorMsg)
-    {
-        this.logMsg = errorMsg;
     }
 
     public String getLogMsg()

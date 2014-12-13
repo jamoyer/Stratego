@@ -1,4 +1,4 @@
-package stratego.controller;
+package stratego;
 
 import java.util.HashMap;
 import java.util.HashSet;
