@@ -164,6 +164,7 @@ public class GameControlThread extends Thread
                     gameToQuit.setWinner(GameInstance.negatePosition(gameToQuit.getPlayerPosition(user)),
                                          Validator.currentTimeSeconds(), GameEnd.Rage);
                 }
+                rspMsg.setGame(gameToQuit, user);
                 rspMsg.setLogMsg(user + " quit!");
                 break;
 
@@ -174,7 +175,7 @@ public class GameControlThread extends Thread
                 {
                     rspMsg.setSuccessful(true);
                     rspMsg.setGame(currentGame, user);
-                    if(currentGame.getWinner() == null)
+                    if (currentGame.getWinner() == null)
                     {
                         rspMsg.setField(currentGame.getFieldSymbolsByPlayer(user));
                     }
@@ -191,15 +192,35 @@ public class GameControlThread extends Thread
                 break;
 
             case "ping":
-                // need to end any games this user is in
+                /*
+                 * Simply refreshes the response time so the user does not lose
+                 * game due to time out. Also checks if the other user rage
+                 * quit.
+                 */
+                rspMsg.setPingResponse(true);
                 GameInstance gameToPing = AppContext.getGame(user);
                 if (gameToPing != null)
                 {
-                    gameToPing.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
+                    // indicates that the game is still active
+                    rspMsg.setSuccessful(true);
+
+                    // check if the game has been won
+                    if (gameToPing.getWinner() != null)
+                    {
+                        rspMsg.setField(gameToPing.getExposedFieldByPlayer(user));
+                        rspMsg.setGame(gameToPing, user);
+                    }
+                    else
+                    {
+                        rspMsg.setLogMsg("Response time updated for " + user);
+                        gameToPing.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
+                    }
                 }
-                rspMsg.setSuccessful(true);
-                rspMsg.setPingResponse(true);
-                rspMsg.setLogMsg("Response time updated for " + user);
+                else
+                {
+                    // indicates that there is no active game
+                    rspMsg.setSuccessful(false);
+                }
                 break;
 
             default:

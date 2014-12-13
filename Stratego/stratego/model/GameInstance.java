@@ -20,11 +20,12 @@ public class GameInstance
     private String bottomPlayerTheme = "classic";
 
     private final long initiatedTime; // seconds
-    private long endTime; // seconds
+    private Long endTime = null; // seconds
 
     private Field field = null;
     private PlayerPosition winner = null;
     private PlayerPosition currentTurn = null;
+    private Long turnTimer = null;
 
     // a grid available for showing the players which units are fighting each
     // other during combat
@@ -52,9 +53,10 @@ public class GameInstance
         }
     }
 
-    public synchronized void setTurn(final PlayerPosition userPos)
+    public synchronized void setTurn(final PlayerPosition userPos, final long time)
     {
         this.currentTurn = userPos;
+        this.turnTimer = time;
     }
 
     public PlayerPosition getTurn()
@@ -62,12 +64,17 @@ public class GameInstance
         return this.currentTurn;
     }
 
-    public long checkPlayerLastResponsetime(final String user)
+    public Long getTurnTimer()
     {
-        return this.checkPlayerLastResponsetime(this.getPlayerPosition(user));
+        return this.turnTimer;
     }
 
-    public long checkPlayerLastResponsetime(final PlayerPosition userPos)
+    public long checkPlayerLastResponsetime(final String user)
+    {
+        return this.checkPlayerLastResponseTime(this.getPlayerPosition(user));
+    }
+
+    public long checkPlayerLastResponseTime(final PlayerPosition userPos)
     {
         if (userPos == null)
         {
@@ -360,15 +367,24 @@ public class GameInstance
         return this.winner;
     }
 
-    public void setWinner(final PlayerPosition position, final long currentTimeSeconds, final GameEnd endType)
+    public void setWinner(final PlayerPosition winner, final long currentTimeSeconds, final GameEnd endType)
     {
-        this.winner = position;
+        this.winner = winner;
         this.endTime = currentTimeSeconds;
         this.currentTurn = null;
         logMsg(getWinnerName() + " has won a game!");
-        AppContext.removeGame(topPlayer);
-        AppContext.removeGame(bottomPlayer);
         new HighScore(getWinnerName(), getLoserName(), endType);
+
+        /*
+         * If a player is taking their turn while the other player rage quits,
+         * that player will not know they have won and will not see the end game
+         * result. Setting this flag notifies them when they ping.
+         */
+        if (!endType.equals(GameEnd.Rage))
+        {
+            AppContext.removeGame(topPlayer);
+            AppContext.removeGame(bottomPlayer);
+        }
     }
 
     public String getOpponent(final String user)
@@ -804,7 +820,7 @@ public class GameInstance
         return true;
     }
 
-    public long getEndTime()
+    public Long getEndTime()
     {
         return endTime;
     }

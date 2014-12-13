@@ -19,10 +19,6 @@ public class GameInstanceController
     // 1 minute is the max time to queue for a new game
     private static final long MAX_QUEUE_TIME_TO_START_GAME_SECONDS = 60;
     private static final long THREAD_SLEEP_SECONDS = 1;
-    private static final long MODERATOR_THREAD_SLEEP_SECONDS = 5;
-
-    // 3 minutes of inactivity allowed for each player before game dies
-    private static final int TIME_OUT_SECONDS = 180;
 
     private static GameInstanceController _instController = null;
     private static Random _rand = null;
@@ -38,47 +34,7 @@ public class GameInstanceController
         _rand = new Random();
 
         // end games that have met their time limit
-        Thread gameModerator = new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                while (true)
-                {
-                    long now = Validator.currentTimeSeconds();
-                    for (GameInstance game : AppContext.getGames())
-                    {
-                        // only check games that have two players set
-                        if (game.getTopPlayer() != null)
-                        {
-
-                            if ((now - game.checkPlayerLastResponsetime(PlayerPosition.TOP_PLAYER)) > TIME_OUT_SECONDS
-                                    && PlayerPosition.TOP_PLAYER.equals(game.getTurn()))
-                            {
-                                game.setWinner(PlayerPosition.BOTTOM_PLAYER, now, GameEnd.Timeout);
-                                logMsg("GameInstanceModerator: " + game.getWinnerName()
-                                        + " has won a game due to opponent time out.");
-                            }
-                            else if ((now - game.checkPlayerLastResponsetime(PlayerPosition.BOTTOM_PLAYER)) > TIME_OUT_SECONDS
-                                    && PlayerPosition.BOTTOM_PLAYER.equals(game.getTurn()))
-                            {
-                                game.setWinner(PlayerPosition.TOP_PLAYER, now, GameEnd.Timeout);
-                                logMsg("GameInstanceModerator: " + game.getWinnerName()
-                                        + " has won a game due to opponent time out.");
-                            }
-                        }
-                    }
-                    try
-                    {
-                        Thread.sleep(MODERATOR_THREAD_SLEEP_SECONDS * 1000);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
+        Thread gameModerator = new Thread(new GameModerator());
         gameModerator.start();
     }
 
@@ -260,12 +216,13 @@ public class GameInstanceController
      * @param user
      * @param positions
      */
-    public void setPositions(PrintWriter output, GameControlMessage rspMsg, final String user, final char[][] positions,
-            String theme)
+    public void setPositions(PrintWriter output, GameControlMessage rspMsg, final String user,
+            final char[][] positions, String theme)
     {
         rspMsg.setSuccessful(false);
         GameInstance game = getGameByUser(user);
         rspMsg.setGame(game, user);
+
         // user has to be in a game
         if (game == null)
         {
@@ -278,6 +235,16 @@ public class GameInstanceController
 
         // update the response time
         game.setPlayerLastResponseTime(user, Validator.currentTimeSeconds());
+
+        // cannot set starting positions until second player has joined
+        if (game.getTopPlayer() == null)
+        {
+            logMsg(user + " cannot set starting positions because there is no second player.");
+            rspMsg.setLogMsg("Unable to set positions: No second player.");
+            output.print(rspMsg.getMessage());
+            output.flush();
+            return;
+        }
 
         // don't let players reset their starting positions
         if (game.checkPlayerHasSetPositions(user))
@@ -376,11 +343,11 @@ public class GameInstanceController
             {
                 if (_rand.nextBoolean())
                 {
-                    game.setTurn(PlayerPosition.BOTTOM_PLAYER);
+                    game.setTurn(PlayerPosition.BOTTOM_PLAYER, Validator.currentTimeSeconds());
                 }
                 else
                 {
-                    game.setTurn(PlayerPosition.TOP_PLAYER);
+                    game.setTurn(PlayerPosition.TOP_PLAYER, Validator.currentTimeSeconds());
                 }
             }
 
@@ -681,7 +648,7 @@ public class GameInstanceController
         {
             rspMsg.setField(game.getFieldSymbolsByPlayer(userPos));
             // user's turn is now over
-            game.setTurn(GameInstance.negatePosition(userPos));
+            game.setTurn(GameInstance.negatePosition(userPos), Validator.currentTimeSeconds());
         }
 
         // display the result of this game

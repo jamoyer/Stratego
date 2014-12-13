@@ -24,7 +24,17 @@ function pingGameControl()
     xmlReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xmlReq.onreadystatechange = function()
     {
-        // should try to detect if there is no response meaning that the connection is bad
+        if (xmlReq.readyState === 4)
+        {
+            // convert the responseText into JSON
+            var response = JSON.parse(xmlReq.responseText);
+
+            // display response for debugging purposes
+            if (response.field != null)
+            {
+                $("#serverResponse").text(JSON.stringify(response));
+            }
+        }
     }
     xmlReq.send("data=" + JSON.stringify(data));
 }
