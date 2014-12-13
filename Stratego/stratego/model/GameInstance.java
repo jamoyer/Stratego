@@ -368,7 +368,7 @@ public class GameInstance
         return this.winner;
     }
 
-    public void setWinner(final PlayerPosition position, final long currentTimeSeconds, final boolean defaultWin)
+    public void setWinner(final PlayerPosition position, final long currentTimeSeconds, final GameEnd endType)
     {
         this.winner = position;
         this.endTime = currentTimeSeconds;
@@ -376,100 +376,7 @@ public class GameInstance
         logMsg(getWinnerName() + " has won a game!");
         AppContext.removeGame(topPlayer);
         AppContext.removeGame(bottomPlayer);
-        /*
-         * TODO: Update the database with the game stats and continue the
-         * thread. Both threads will eventually exit and the game will end.
-         */
-        if (!defaultWin)
-        {
-            addHighScore(new ResponseMessage(), getWinnerName(), getLoserName(), getEndTime());
-        }
-    }
-
-    private void addHighScore(ResponseMessage rspMsg, final String winner, final String loser, final long endTime)
-    {
-        logMsg("Adding new hs");
-        boolean isSuccessful = false;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try
-        {
-            // STEP 2: Register JDBC driver
-            Class.forName(DRIVER);
-
-            // STEP 3: Open a connection
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
-            // STEP 4: Execute a prepared query
-            // prepared statements are better than escaping strings and
-            // guarantee there is no sql injection
-            String sql = "INSERT INTO highscores (winner, loser, endtime) VALUES (?, ?, ?)";
-            stmt = conn.prepareStatement(sql);
-
-            stmt.setString(1, winner);
-            stmt.setString(2, loser);
-            stmt.setInt(3, (int) endTime);
-
-            try
-            {
-                if (stmt.executeUpdate() == 1)
-                {
-                    // success
-                    rspMsg.setSuccessful(true);
-                    rspMsg.setLogMsg(winner + " defeated " + loser + "in " + endTime + "added to highscores");
-                    isSuccessful = true;
-                }
-            }
-            catch (SQLException e)
-            {
-                e.printStackTrace();
-
-                // failure
-                rspMsg.setSuccessful(false);
-                rspMsg.setLogMsg("Bad Data");
-                isSuccessful = false;
-            }
-
-            // STEP 6: Clean-up environment
-            stmt.close();
-            conn.close();
-        }
-        catch (SQLException se)
-        {
-            // Handle errors for JDBC
-            se.printStackTrace();
-        }
-        catch (Exception e)
-        {
-            // Handle errors for Class.forName
-            e.printStackTrace();
-        }
-        finally
-        {
-            // finally block used to close resources
-            try
-            {
-                if (stmt != null)
-                {
-                    stmt.close();
-                }
-            }
-            catch (SQLException se2)
-            {
-            }
-            try
-            {
-                if (conn != null)
-                {
-                    conn.close();
-                }
-            }
-            catch (SQLException se)
-            {
-                se.printStackTrace();
-            }
-        }
-
+        new HighScore(getWinnerName(), getLoserName(), endType);
     }
 
     public String getOpponent(final String user)
@@ -885,22 +792,22 @@ public class GameInstance
         {
             if (this.currentTurn.equals(PlayerPosition.BOTTOM_PLAYER))
             {
-                setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, false);
+                setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, GameEnd.Standard);
             }
             else
             {
-                setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, false);
+                setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, GameEnd.Standard);
             }
         }
 
         // otherwise there is just a normal win
         else if (bottomCanMove)
         {
-            setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, false);
+            setWinner(PlayerPosition.BOTTOM_PLAYER, currentTimeSeconds, GameEnd.Standard);
         }
         else
         {
-            setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, false);
+            setWinner(PlayerPosition.TOP_PLAYER, currentTimeSeconds, GameEnd.Standard);
         }
         return true;
     }

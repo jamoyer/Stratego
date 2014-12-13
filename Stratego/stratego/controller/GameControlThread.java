@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import stratego.model.Field;
+import stratego.model.GameEnd;
 import stratego.model.GameInstance;
 import stratego.model.Position;
 import stratego.model.ResponseMessage;
@@ -161,7 +162,7 @@ public class GameControlThread extends Thread
                 {
                     // the opponent wins by default
                     gameToQuit.setWinner(GameInstance.negatePosition(gameToQuit.getPlayerPosition(user)),
-                                         Validator.currentTimeSeconds(), true);
+                                         Validator.currentTimeSeconds(), GameEnd.Rage);
                 }
                 rspMsg.setLogMsg(user + " quit!");
                 break;

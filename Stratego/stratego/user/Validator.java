@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import stratego.controller.AppContext;
+import stratego.model.GameEnd;
 import stratego.model.GameInstance;
 import stratego.model.ResponseMessage;
 import static stratego.database.DatabaseAccess.*;
@@ -90,7 +91,7 @@ public class Validator extends HttpServlet
                 {
                     // the opponent wins by default
                     game.setWinner(GameInstance.negatePosition(game.getPlayerPosition(user)),
-                                   Validator.currentTimeSeconds(), true);
+                                   Validator.currentTimeSeconds(), GameEnd.Rage);
                 }
                 isSuccessful = true;
                 rspMsg.setLogMsg(user + " logged out.");
@@ -246,7 +247,7 @@ public class Validator extends HttpServlet
             // STEP 4: Execute a prepared query
             // prepared statements are better than escaping strings and
             // guarantee there is no sql injection
-            String sql = "INSERT INTO users (user, password) VALUES (?, ?)";
+            String sql = "INSERT INTO users (user, password, score) VALUES (?, ?, 0)";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, password);

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import stratego.model.Field;
+import stratego.model.GameEnd;
 import stratego.model.GameInstance;
 import stratego.model.PlayerPosition;
 import stratego.model.Position;
@@ -54,14 +55,14 @@ public class GameInstanceController
                             if ((now - game.checkPlayerLastResponsetime(PlayerPosition.TOP_PLAYER)) > TIME_OUT_SECONDS
                                     && PlayerPosition.TOP_PLAYER.equals(game.getTurn()))
                             {
-                                game.setWinner(PlayerPosition.BOTTOM_PLAYER, now, true);
+                                game.setWinner(PlayerPosition.BOTTOM_PLAYER, now, GameEnd.Timeout);
                                 logMsg("GameInstanceModerator: " + game.getWinnerName()
                                         + " has won a game due to opponent time out.");
                             }
                             else if ((now - game.checkPlayerLastResponsetime(PlayerPosition.BOTTOM_PLAYER)) > TIME_OUT_SECONDS
                                     && PlayerPosition.BOTTOM_PLAYER.equals(game.getTurn()))
                             {
-                                game.setWinner(PlayerPosition.TOP_PLAYER, now, true);
+                                game.setWinner(PlayerPosition.TOP_PLAYER, now, GameEnd.Timeout);
                                 logMsg("GameInstanceModerator: " + game.getWinnerName()
                                         + " has won a game due to opponent time out.");
                             }
@@ -654,7 +655,7 @@ public class GameInstanceController
             {
                 game.getField().setUnitAt(destination, sourceUnit);
                 game.getField().setUnitAt(source, null);
-                game.setWinner(userPos, Validator.currentTimeSeconds(), false);
+                game.setWinner(userPos, Validator.currentTimeSeconds(), GameEnd.Standard);
             }
         }
 
