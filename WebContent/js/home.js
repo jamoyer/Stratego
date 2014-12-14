@@ -1,3 +1,17 @@
+
+var bankSelected = false;
+/*
+ * this will ping the game server every 5 seconds and refresh the response time
+ */ 
+function pingForever()
+{
+    setTimeout(function()
+    {
+        pingGameControl();
+        pingForever();
+    }, 5000);
+}
+
 /*
  * Returns the status of the current game running for the user. 
  * isSuccessful will be false if the user is not in a game.
@@ -48,6 +62,7 @@ function joinNewGame()
     {
         actionType : "newGame"
     };
+    $("#buttonStartGameContainer").html('<button class="btn btn-lg btn-warning"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Searching for Opponent...</button>');
     makeGameControlRequest(data);
 }
 
@@ -145,6 +160,7 @@ function makeGameControlRequest(JSONObjectToSend)
             // display response for debugging purposes\
             $("#serverResponse").text(JSON.stringify(data));
 
+
             // if (!data.isSuccessful)
             // {
             // // could not move unit for some reason
@@ -213,6 +229,55 @@ function makeGameControlRequest(JSONObjectToSend)
             // var field = data.field;
             // drawField(field);
             // }
+            if (JSONObjectToSend["actionType"] = "newGame") {
+            	data = data[0];
+            	if (data.isSuccessful) {
+            		$.ajax({
+        				url: '/Stratego/_place.jsp',
+        				type: 'GET',
+        				success: function(response) {
+        					$("#container").html(response);
+        					updateField(data.field);
+        					$(".bankTile").on('click', function(e) {
+        						bankSelected = true;
+        						var type = $(this).attr('class')[0];
+        						$(this).css("border-color", "red");
+        						$(".tile").on('click', function(e) {
+        							var currentTileClass = $(this).attr('class').split(/\s+/)[1];
+        							var currentTileType = currentTileClass.substring(5);
+        							if (currentTileType == "empty")
+        							{
+	        							$(this).addClass(type);
+	        							$(".tile").unbind('click');
+	        							bankSelected = false;
+        							}
+        						});
+        					});
+        					$(".tile").on('click', function(e) {
+        						if (!bankSelected)
+        						{
+        							var currentTileClass = $(this).attr('class').split(/\s+/)[1];
+        							var currentTileType = currentTileClass.substring(5);
+        							
+	        						var type = $(this).attr('class')[0];
+	        						$(this).css("border-color", "red");
+	        						$(".tile").on('click', function(e) {
+	        							var currentTileClass = $(this).attr('class').split(/\s+/)[1];
+	        							var currentTileType = currentTileClass.substring(5);
+	        							if (currentTileType == "empty")
+	        							{
+		        							$(this).addClass(type);
+		        							$(".tile").unbind('click');
+	        							}
+	        						});
+        						}
+        					});
+        				}
+        			});
+            	} else {
+            		$("#buttonStartGameContainer").html('<p id="buttonStartGameContainer"><button class="btn btn-primary btn-lg" role="button" onClick="joinNewGame()">Play</button></p>');
+            	}
+           	}
         }
     }
     xmlReq.send("data=" + JSON.stringify(JSONObjectToSend));
@@ -232,5 +297,29 @@ function quitGame()
  */
 function drawField(field)
 {
+	for (var i = 0; i < field.length; i++) {
+		$("#field").append('<div class="tileRow"></div>');
+		for (var j = 0; j < field[i].length; j++) {
+			var rowArray = $("#field .tileRow");
+			$(rowArray[rowArray.length - 1]).append('<div class="tile tile-' + field[i][j] + '"></div>');
+		}
+	}
+}
 
+function updateField(field)
+{
+	var currentField = $(".tileRow");
+	for (var i = 0; i < field.length; i++) {
+		var currentRow = $(currentField[i]).find(".tile");
+		for (var j = 0; j < field[i].length; j++) {
+			var currentTileClass = $(currentRow[j]).attr('class').split(/\s+/)[1];
+			var currentTileType = currentTileClass.substring(5);
+			var newTileType = getUnitTypeFromChar(field[i][j]).name.toLowerCase();
+			if (currentTileType != newTileType)
+			{
+				$(currentRow[j]).removeClass(currentTileClass);
+				$(currentRow[j]).addClass("tile-" + newTileType);
+			}
+		}
+	}
 }

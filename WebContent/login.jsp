@@ -6,8 +6,7 @@
     {
         response.sendRedirect("/Stratego/home.jsp");
     }
-    else
-    {
+    else {
 %>
 <!DOCTYPE html>
 <html>
@@ -15,16 +14,12 @@
 	<meta charset=utf-8 />
 	<title>JSweeper</title>
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/bootstrap.min.css" />
-	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/index.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/main.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/login.css" />
 	<script src="/Stratego/js/jquery.min.js"></script>
 	<script src="/Stratego/js/jquery-ui.min.js"></script>
 	<script src="/Stratego/js/bootstrap.min.js"></script>
-	<script src="/Stratego/js/index.js"></script>
-	<script src="//use.typekit.net/qxl0nsj.js"></script>
-	<script>try{Typekit.load();}catch(e){}</script>
-	<!--[if IE]>
-		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
+	<script src="/Stratego/js/login.js"></script>
 </head>
 <body>
 	<div class="container-centered">

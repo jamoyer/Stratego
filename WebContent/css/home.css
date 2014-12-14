@@ -1,0 +1,102 @@
+.gameContainer
+{
+	padding: 20px;
+	border-radius: 6px;
+	background-color: rgb(238, 238, 238);
+}
+
+.navbar a.navbar-brand
+{
+	line-height: normal;
+	font-size: 30px;
+	padding: 11px 15px 9px 15px;
+}
+
+.navbar a,
+.navbar p
+{
+	font-size: 16px;
+	line-height: normal;
+}
+
+#AboutModalButton:hover
+{
+	cursor: pointer;
+}
+
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+
+.tile
+{
+	width: 70px;
+	height: 70px;
+	padding: 4px;
+	border: 1px solid transparent;
+	background-image: url("../img/mariobros/1.jpg");
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-position: center center;
+	float:left;
+	position: relative;
+}
+
+#gameContainer #field
+{
+	padding: 9px;
+}
+
+.tileRow
+{
+	width: 700px;
+}
+
+.bankRow
+{
+	width: 680px;
+}
+
+.bankTile
+{
+	width: 60px;
+	height: 60px;
+	padding-right: 2px;
+	border: 0px;
+	background-color: green;
+	background-repeat: no-repeat;
+	background-positon: center center;
+	float:left;
+}
+
+.bankTile:last-child
+{
+	padding-right: 0px;
+}
+
+.tile-empty:after
+{
+	content: "9";
+	position: absolute;
+	left: 4px;
+	bottom: 4px;
+	background-color: #e7e7e7;
+	-webkit-border-top-right-radius: 2px;
+	-moz-border-radius-topright: 2px;
+	border-top-right-radius: 2px;
+	padding: 0 4px;
+	font-weight: bold;
+	color: #777;
+	
+}

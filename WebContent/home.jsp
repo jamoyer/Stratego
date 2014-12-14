@@ -1,71 +1,157 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="org.apache.commons.lang3.StringEscapeUtils;"%>
+<%@ page
+    import="org.apache.commons.lang3.StringEscapeUtils,
+            stratego.model.TileSymbol, 
+            stratego.model.UnitType;"
+%>
 <%
     String sessionUser = (String) session.getAttribute("user");
-			// Users must login before viewing the home page
-			if (sessionUser == null || sessionUser.isEmpty()) {
-				response.sendRedirect("/Stratego/login.jsp");
-			} else {
+
+	// Users must login before viewing the home page
+	if (sessionUser == null || sessionUser.isEmpty()) {
+		response.sendRedirect("/Stratego/login.jsp");
+	} else {
 %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script src="/Stratego/js/jquery-2.1.1.min.js"></script>
-<script src="/Stratego/js/home.js"></script>
-<title>Stratego - Home</title>
-<script>
-    // this will ping the game server every 5 seconds and refresh the response time
-    function pingForever()
-    {
-        setTimeout(function()
-        {
-            pingGameControl();
-            pingForever();
-        }, 5000);
-    }
-    pingForever();
-
-    //returns the current game, if the user is in a game already
-    getCurrentGame();
-</script>
+	<meta charset=utf-8 />
+	<title>JSweeper</title>
+	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/main.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/home.css" />
+	<script src="/Stratego/js/jquery.min.js"></script>
+	<script src="/Stratego/js/jquery-ui.min.js"></script>
+	<script src="/Stratego/js/bootstrap.min.js"></script>
+	<script src="//use.edgefonts.net/patua-one.js"></script>
+	<script>
+		function getUnitTypeFromChar(symbol)
+		{
+		    var tileType = {};
+		    switch (symbol)
+		    {
+		        <%for (TileSymbol tile : TileSymbol.values())
+		        {
+		            UnitType unit = UnitType.getUnitByTile(tile);
+		            int numUnits = -1;
+		            if(unit != null)
+		            {
+		                numUnits = unit.getNumUnits();
+		            }%>
+		        case "<%out.print(tile.getSymbol());%>":
+		            tileType.name = "<%out.print(tile.toString());%>";
+		            tileType.numUnits = "<%out.print(numUnits);%>";
+		            break;
+		        <%}%>
+		        default:
+		            tileType = null;
+		        break;
+		    }
+		    return tileType;
+		}
+	</script>
+	<script src="/Stratego/js/home.js"></script>
 </head>
 <body>
-    <h1>Welcome!</h1>
-    <h3>
-        Logged in as
-        <%
-        out.print(StringEscapeUtils.escapeHtml4(sessionUser));
-    %>
-    </h3>
-    <div>
-        <form action="/Stratego/Validator" method="post">
-            <input type="hidden" name="actionType" value="logout"></input>
-            <br> <br>
-            <input type="submit" value="Logout"></input>
-        </form>
-    </div>
-    <div>
-        <button onclick="joinNewGame()">New Game</button>
-        <button onclick="setStartPositions()">Set Start Positions</button>
-        <input type="text" id="theme"></input>
-        <button onclick="quitGame()">Quit Game</button>
-        <h5>Source</h5>
-        <p>Source Row</p>
-        <input type="text" id="sourceRow"></input>
-        <p>Source Column</p>
-        <input type="text" id="sourceCol"></input>
-        <h5>Destination</h5>
-        <p>Destination Row</p>
-        <input type="text" id="destinationRow"></input>
-        <p>Destination Column</p>
-        <input type="text" id="destinationCol"></input>
-        <button onclick="moveUnit()">Move Unit</button>
-    </div>
-    <div>
-        <h4>Server Response</h4>
-        <p id="serverResponse"></p>
-    </div>
+<p id="serverResponse"></p>
+<div class="container">
+	<!-- Static navbar -->
+	<div class="navbar navbar-default" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand title" href="home.php">Stratego</a>
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Difficulty <span class="caret"></span></a>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#" id="beginner" >Beginner</a></li>
+							<li><a href="#" id="intermediate" >Intermediate</a></li>
+							<li><a href="#" id="expert" >Expert</a></li>
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Theme <span class="caret"></span></a>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#" id="normalMode">Normal</a></li>
+							<li><a href="#" id="batmanMode">Batman</a></li>
+							<li><a href="#" id="sharkMode">Shark</a></li>
+						</ul>
+					</li>
+					<li><a id="AboutModalButton" data-toggle="modal" data-target="#AboutModal">About</a></li>
+				</ul>
+				<div class="navbar-right">
+					<p class="navbar-text">Signed in as <% out.print(StringEscapeUtils.escapeHtml4(sessionUser)); %></p>
+					<button type="button" class="btn btn-default navbar-btn" id="buttonLogout">Logout</button>
+				</div>
+			</div><!--/.nav-collapse -->
+		</div><!--/.container-fluid -->
+	</div>
+
+	<div class="row">
+		<div class="col-md-12" id="container">
+			
+		</div>
+	</div>
+
+</div> <!-- /container -->
+
+<!-- Modal -->
+<div class="modal fade" id="AboutModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title title" id="myModalLabel">Stratego</h4>
+			</div>
+			<div class="modal-body">
+				JSweeper is a Linux-Apache-MySQL-PHP (LAMP) web application rendition of the classic Minesweeper game created by Jacob Moyer, Matt Clucas,  and Mike Mead. In the next version... multiplayer, and more!
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+$(document).ready()
+{
+	pingForever();
+	var currentGame = getCurrentGame();
+	if (currentGame) {
+		
+	} else
+	{
+		$.ajax({
+			url: '/Stratego/html/newGame.html',
+			type: 'GET',
+			success: function(data) {
+				$("#container").html(data);
+			}
+		});
+	}
+		
+	$('#buttonLogout').on('click', function(e) {
+		var request = {};
+		request["actionType"] = "logout";
+		$.ajax({
+			url: '/Stratego/Validator',
+			type: 'POST',
+			data: request,
+			success: function(data) {
+				window.location.replace("/Stratego/")
+			},	
+			error: function() {
+				alert("An error has occurred");
+			}
+		});
+	});
+}
+</script>
 </body>
 </html>
 <%

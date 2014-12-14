@@ -1,0 +1,22 @@
+.container-centered
+{
+	margin: auto;
+	width: 310px;
+	height: 310px;
+	position: absolute;
+	top:0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.panel-heading .title
+{
+	margin: 0px;
+	text-align: center
+}
+
+.panel-login
+{
+	box-shadow: rgba(200,200,200,0.7) 0 4px 10px -1px;
+}

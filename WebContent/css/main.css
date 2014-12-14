@@ -1,0 +1,16 @@
+.clear
+{
+	clear: both;
+}
+
+.right
+{
+	float: right;
+}
+
+.left
+{
+	float: left;
+}
+
+.title { font-family: "patua-one", Arial, "Helvetica Neue", Helvetica, sans-serif }
