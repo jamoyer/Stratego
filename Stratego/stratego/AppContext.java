@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.servlet.AsyncContext;
 
 import stratego.model.GameInstance;
+import stratego.user.Validator;
 
 /**
  * This class holds and ensures the integrity of the GameInstances and
@@ -19,6 +20,8 @@ import stratego.model.GameInstance;
  */
 public class AppContext
 {
+    
+    
     private static final int INITIAL_GAMES_CAPACITY = 30;
     private static final HashMap<String, GameInstance> _gameInstances = new HashMap<String, GameInstance>(
             INITIAL_GAMES_CAPACITY);
@@ -26,6 +29,10 @@ public class AppContext
     private static final int INITIAL_CONTEXT_CAPACITY = 20;
     private static final HashMap<String, AsyncContext> _contextStore = new HashMap<String, AsyncContext>(
             INITIAL_CONTEXT_CAPACITY);
+    
+    private static final int INITIAL_USER_CAPACITY = 10;
+    private static final HashMap<String, Long> _users = new HashMap<String, Long>(
+            INITIAL_USER_CAPACITY);
 
     public AppContext()
     {
@@ -45,6 +52,37 @@ public class AppContext
         {
             _gameInstances.put(user, game);
         }
+    }
+    
+    public static void removeUser(final String user)
+    {
+        synchronized (_users)
+        {
+            _users.remove(user);
+        }
+    }
+
+    public static void putUser(final String user)
+    {
+        synchronized (_users)
+        {
+            _users.put(user, Validator.currentTimeSeconds());
+        }
+    }
+    
+    public static Long getUser(final String user)
+    {
+        return _users.get(user);
+    }
+    
+    public static List<String> getOnlineUsers()
+    {
+        List<String> users = new LinkedList<String>();
+        for (String user : _users.keySet())
+        {
+            users.add(user);
+        }
+        return users;
     }
 
     public static GameInstance getGame(final String user)

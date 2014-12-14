@@ -11,6 +11,9 @@ public class GameModerator implements Runnable
     private static final String CLASS_LOG = "GameModerator: ";
 
     private static final int MODERATOR_THREAD_SLEEP_SECONDS = 5;
+    
+    // 3 minutes allowed before
+    private static final int LOGOUT_TIME_OUT = 180;
 
     // 3 minutes allowed for each players turn before game dies
     private static final int RAGE_TIME_OUT_SECONDS = 180;
@@ -48,12 +51,14 @@ public class GameModerator implements Runnable
                         game.setWinner(PlayerPosition.BOTTOM_PLAYER, now, GameEnd.Timeout);
                         logMsg("GameInstanceModerator: " + game.getWinnerName()
                                 + " has won a game due to opponent time out.");
+                        AppContext.removeUser(game.getLoserName());
                     }
                     else if ((now - game.checkPlayerLastResponseTime(PlayerPosition.BOTTOM_PLAYER)) > DISCONNECT_TIME_OUT_SECONDS)
                     {
                         game.setWinner(PlayerPosition.TOP_PLAYER, now, GameEnd.Timeout);
                         logMsg("GameInstanceModerator: " + game.getWinnerName()
                                 + " has won a game due to opponent time out.");
+                        AppContext.removeUser(game.getLoserName());
                     }
                 }
 
@@ -69,6 +74,13 @@ public class GameModerator implements Runnable
                     {
                         AppContext.removeGame(game.getBottomPlayer());
                     }
+                }
+            }
+            for (String user : AppContext.getOnlineUsers())
+            {
+                if(now-AppContext.getUser(user)>LOGOUT_TIME_OUT)
+                {
+                    AppContext.removeUser(user);
                 }
             }
             try

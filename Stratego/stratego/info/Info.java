@@ -69,9 +69,11 @@ public class Info extends HttpServlet
         switch (actionType)
         {
             case "getCurrentUsers":
-
+                rspMsg.setUsers();
                 break;
-
+            case "getHighScores":
+                rspMsg.setHighScores();
+                break;
             default:
                 rspMsg.setSuccessful(false);
                 rspMsg.setLogMsg("Invalid Action Type.");

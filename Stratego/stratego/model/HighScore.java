@@ -1,9 +1,13 @@
 package stratego.model;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import stratego.database.DatabaseAccess;
+import stratego.info.InfoMessage;
 
 public class HighScore
 {
@@ -11,13 +15,43 @@ public class HighScore
 
     public HighScore(final String winner, final String loser, final GameEnd endType)
     {
+        if (winner!=null)
+        {
         updateHighScores(endType, winner, loser);
         updateUserScore(endType, winner, loser);
+        }
     }
 
-    public static String getHighScores()
+    public static List<String[]> getHighScores()
     {
-        return "";
+        logMsg("Getting scores");
+        PreparedStatement stmt = null;
+        List<String[]> table = new ArrayList<>();
+        String sql = "SELECT user, score FROM users ORDER BY score DESC LIMIT 10";
+        stmt = DatabaseAccess.prepareSQL(sql);
+        
+        try
+        {
+            ResultSet rs = stmt.executeQuery();
+            int nCol = rs.getMetaData().getColumnCount();
+            while( rs.next()) {
+                String[] row = new String[nCol];
+                for( int iCol = 1; iCol <= nCol; iCol++ ){
+                    row[iCol-1] = rs.getObject( iCol ).toString();
+                }
+                table.add( row );
+            }
+            stmt.close();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+
+            // failure
+            logMsg("Returning empty list");
+        }
+        
+        return table;
     }
 
     private void updateHighScores(GameEnd endType, final String winner, final String loser)
@@ -109,7 +143,7 @@ public class HighScore
         }
     }
 
-    private void logMsg(final String msg)
+    private static void logMsg(final String msg)
     {
         System.out.println(CLASS_LOG + msg);
     }
