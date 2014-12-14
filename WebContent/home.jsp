@@ -166,6 +166,7 @@
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
+					<!--
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Difficulty <span class="caret"></span></a>
 						<ul class="dropdown-menu" role="menu">
@@ -182,6 +183,8 @@
 							<li><a href="#" id="sharkMode">Shark</a></li>
 						</ul>
 					</li>
+					 -->
+					<li><a id="AboutModalButton" data-toggle="modal" data-target="#AboutModal">High Scores</a></li>
 					<li><a id="AboutModalButton" data-toggle="modal" data-target="#AboutModal">About</a></li>
 				</ul>
 				<div class="navbar-right">

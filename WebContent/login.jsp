@@ -20,6 +20,7 @@
 	<script src="/Stratego/js/jquery-ui.min.js"></script>
 	<script src="/Stratego/js/bootstrap.min.js"></script>
 	<script src="/Stratego/js/login.js"></script>
+	<script src="//use.edgefonts.net/patua-one.js"></script>
 </head>
 <body>
 	<div class="container-centered">

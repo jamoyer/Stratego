@@ -1,6 +1,8 @@
 
 var bankSelected = false;
 var selectedFieldTile = null;
+var playerNumber = null;
+var gameStarted = false;
 /*
  * this will ping the game server every 5 seconds and refresh the response time
  */ 
@@ -55,58 +57,6 @@ function pingGameControl()
 }
 
 /*
- * Gets highscores
- */
-function pingHighScores()
-{
-    var xmlReq = new XMLHttpRequest();
-    xmlReq.open('POST', '/Stratego/Info', true);
-    xmlReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xmlReq.onreadystatechange = function()
-    {
-        if (xmlReq.readyState === 4)
-        {
-            // convert the responseText into JSON
-            var response = JSON.parse(xmlReq.responseText);
-
-            // display response for debugging purposes
-            if (response != null)
-            {
-            	alert(xmlReq.responseText);
-            }
-        }
-    }
-    xmlReq.send("actionType=getHighScores");
-    
-}
-
-/*
- * Gets users logged in
- */
-function pingOnlineUsers()
-{
-    var xmlReq = new XMLHttpRequest();
-    xmlReq.open('POST', '/Stratego/Info', true);
-    xmlReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xmlReq.onreadystatechange = function()
-    {
-        if (xmlReq.readyState === 4)
-        {
-            // convert the responseText into JSON
-            var response = JSON.parse(xmlReq.responseText);
-
-            // display response for debugging purposes
-            if (response != null)
-            {
-            	alert(xmlReq.responseText);
-            }
-        }
-    }
-    xmlReq.send("actionType=getCurrentUsers");
-    
-}
-
-/*
  * Calls GameControl and attempts to join the user to a new game.
  */
 function joinNewGame()
@@ -119,28 +69,6 @@ function joinNewGame()
     makeGameControlRequest(data);
 }
 
-/*
- * Sends the user's chosen starting positions to the GameControl. GameControl returns the inital
- * 10x10 field to display.
- */
-function setStartPositions()
-{
-    var startingPositions = [ [ '1', 'B', 'B', 'B', 'B', 'B', 'B', 'S', '5', '9' ],
-            [ '9', '9', '9', '9', '9', '9', '8', '8', '8', '8' ],
-            [ '8', '7', '7', '7', '7', '6', '6', '6', '6', '5' ],
-            [ '9', '5', '5', '4', '4', '4', '3', '3', '2', 'F' ] ];
-
-    var theme = document.getElementById('theme').value;
-
-    var data =
-    {
-        actionType : "setPositions",
-        positions : JSON.stringify(startingPositions),
-        theme : theme
-    };
-
-    makeGameControlRequest(data);
-}
 
 // Calls GameControl attempting to move the source to the destination. GameControl will return twice
 // under a normal successful move. First it will return the field after moving the unit. Then it
@@ -310,25 +238,23 @@ function getListOfAllowedMoves(field, coordinate)
  * 10x10 field to display.
  */
 function setStartPositions(isTopPlayer)
-{
+{	
     var startingField = [];
-    var count = 0;
     var currentField = $(".tileRow");
-    $(currentField).each(function(row)
+    $(currentField).each(function(rowIndex, row)
     {
-        if (count >= 6)
+        if (rowIndex >= 6)
         {
             var startingRow = [];
-            $(row).each(function(element)
+            $(row).children(".tile").each(function(colIndex, element)
             {
                 var currentTileClass = $(element).attr('class').split(/\s+/)[1];
-                var currentTileType = currentTileClass.substring(5);
+                var currentTileType = currentTileClass.substring(5).toUpperCase();
                 var symbol = getCharFromUnitType(currentTileType);
                 startingRow.push(symbol);
             });
             startingField.push(startingRow);
         }
-        count++;
     });
 
     if (isTopPlayer)
@@ -336,7 +262,8 @@ function setStartPositions(isTopPlayer)
         startingField = flipField(startingField);
     }
 
-    var theme = document.getElementById('theme').value;
+    //var theme = document.getElementById('theme').value;
+    var theme = "batman";
 
     var data =
     {
@@ -376,7 +303,14 @@ function makeGameControlRequest(JSONObjectToSend)
             }
             return responseArray;
         }
-
+/*        
+        if (xmlReq.readyState === 1)
+        {
+        	if (JSONObjectToSend["actionType"] == "setPositions") {
+        		$("#gameContainer").prepend('<button id="waitingBanner" disabled="disabled" class="btn btn-lg btn-warning"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Waiting for Opponent...</button>');
+        	}
+        }
+*/
         if (xmlReq.readyState === 3)
         {
             // convert the responseText into JSON
@@ -384,26 +318,12 @@ function makeGameControlRequest(JSONObjectToSend)
 
             // display response for debugging purposes\
             $("#serverResponse").text(JSON.stringify(data));
-
-
-            // if (!data.isSuccessful)
-            // {
-            // // could not move unit for some reason
-            // // error message will be stored in errorMsg
-            // // do something with it
-            //
-            // var errorMsg = data.errorMsg;
-            // alert(errorMsg);
-            // return;
-            // }
-            // // A ready state of 3 means that the move was successful and we are waiting for the
-            // // opponent to take their turn. There should be no error message here.
-            //
-            // // the 10x10 field will be stored in data.field.
-            // // This will consist of a double array of characters, each corresponding some unit or
-            // // tile to display, the mapping is defined in home.jsp
-            // var field = data.field;
-            // drawField(field);
+            
+            if (JSONObjectToSend["actionType"] == "moveUnit" || JSONObjectToSend["actionType"] == "setPositions" || gameStarted) {
+            	
+            	data = data[data.length - 1];
+            	setPositionsResponse(data);
+            }
         }
         if (xmlReq.readyState === 4)
         {
@@ -413,50 +333,12 @@ function makeGameControlRequest(JSONObjectToSend)
             // display response for debugging purposes
             $("#serverResponse").text(JSON.stringify(data));
 
-            // if (!data.isSuccessful)
-            // {
-            // // could not move unit for some reason
-            // // error message will be stored in errorMsg
-            // // do something with it
-            //
-            // var errorMsg = data.errorMsg;
-            // alert(errorMsg);
-            // return;
-            // }
-            //
-            // if (data.gameWon != null)
-            // {
-            // // do stuff for a victorious game
-            // }
-            // else if (data.gameLost != null)
-            // {
-            // // do stuff for a lost game
-            // }
-            // else if (data.playerNum != null)
-            // {
-            // // do stuff for a new game
-            //
-            // var playerNum = data.playerNum;
-            //
-            // // opponent's username, display this somewhere
-            // var opponent = data.opponent;
-            //
-            // // allow the user to choose starting positions, etc ...
-            // }
-            // else
-            // {
-            // // just do regular display action
-            //
-            // // the 10x10 field will be stored in data.field.
-            // // This will consist of a double array of characters, each corresponding some unit
-            // // or
-            // // tile to display, the mapping is defined in home.jsp
-            // var field = data.field;
-            // drawField(field);
-            // }
-            if (JSONObjectToSend["actionType"] = "newGame") {
+            if (JSONObjectToSend["actionType"] == "newGame") {
             	data = data[0];
             	if (data.isSuccessful) {
+            		playerNumber = data.playerNum;
+            		var isTopPlayer = (playerNumber == 2);
+            			
             		$.ajax({
         				url: '/Stratego/_place.jsp',
         				type: 'GET',
@@ -500,6 +382,7 @@ function makeGameControlRequest(JSONObjectToSend)
 			        								$(this).removeClass("tile-empty");
 				        							$(this).addClass("tile-" + selectedTileType);
 				        							counters[selectedTileType]--;
+				        							totalCounter--;
 				        							if (counters[selectedTileType] == 0)
 				        							{
 				        								selectedTile = $(selectedTile).remove();
@@ -513,9 +396,7 @@ function makeGameControlRequest(JSONObjectToSend)
         						}
         					});
         					
-        					$(".tile").on('click.fieldToField', fieldToField);		
-        					function fieldToField()
-        					{
+        					$(".tile").on('click.fieldToField', function () {
         						if (!bankSelected)
         						{
         							var currentTile = this;
@@ -544,16 +425,93 @@ function makeGameControlRequest(JSONObjectToSend)
             							}
         							}
         						}
-        					}
+        					});
+        					
+        					$("#buttonSetStartPositions").on('click', function(e) {
+        						totalCounter = 0;
+        						if (totalCounter == 0)
+        						{
+        							$(".tile").off('click');
+        							selectedFieldTile = null;
+        							$(".bankTile").off('click');
+        							setStartPositions(isTopPlayer);
+        							$("#gameContainer").prepend('<button id="waitingBanner" disabled="disabled" class="btn btn-lg btn-warning"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Waiting for Opponent...</button>');	
+        						} else
+        						{
+        							alert("You must place all units");
+        						}
+        					})
         				}
         			});
             	} else {
             		$("#buttonStartGameContainer").html('<p id="buttonStartGameContainer"><button class="btn btn-primary btn-lg" role="button" onClick="joinNewGame()">Play</button></p>');
             	}
            	}
+            /*
+            if (JSONObjectToSend["actionType"] == "setPositions") {
+            	setPositionsResponse(data[0]);
+            }
+            */
         }
     }
     xmlReq.send("data=" + JSON.stringify(JSONObjectToSend));
+}
+
+function setPositionsResponse(data) {
+	if(data.isSuccessful)
+	{
+		gameStarted = true;
+		if (data.playerNum == 2)
+		{
+			data.field = flipField(data.field);
+		}
+		updateField(data.field);
+		
+		if(data.playerNum == data.currentTurn)
+		{
+			$("#waitingBanner").remove();
+			$(".tile").on('click.moveUnit', function() {
+				var clickedTile = this;
+				var coordinate = {};
+				coordinate["col"] = $(clickedTile).index();
+				coordinate["row"] = $(clickedTile).parent().index();
+				
+				if (selectedFieldTile == null)
+				{
+					var allowedDestinations = getListOfAllowedMoves(data.field, coordinate);
+					for(var i = 0; i < allowedDestinations.length; i++)
+					{
+						var destination = allowedDestinations[i];
+						var destRow = $(".tileRow")[destination["row"]];
+						var destTile = $(destRow).children(".tile")[destination["col"]];
+						if (destination.isAttack)
+							$(destTile).css("border-color","red");
+						else
+							$(destTile).css("border-color","green");
+					}
+					selectedFieldTile = clickedTile;
+				} else {
+					$(".tile").off('click');
+					var precedingCoordinate = {};
+					precedingCoordinate["col"] = $(selectedFieldTile).index();
+					precedingCoordinate["row"] = $(selectedFieldTile).parent().index();
+					selectedFieldTile = null;
+					if (data.playerNum == 2)
+					{
+						//data.field = flipField(data.field);
+						var flipPredCoord = flipCoordinate(precedingCoordinate, data.field.length, data.field[0].length);
+						var flipDestCoord = flipCoordinate(coordinate, data.field.length, data.field[0].length);
+						sendMoveRequest(flipPredCoord, flipDestCoord);
+					} else {
+						sendMoveRequest(precedingCoordinate, coordinate);
+					}
+				}
+			});
+		} else
+		{
+			$("#gameContainer").prepend('<button id="waitingBanner" disabled="disabled" class="btn btn-lg btn-warning"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Waiting for Opponent...</button>');
+		}
+	}
 }
 
 function quitGame()
@@ -595,4 +553,70 @@ function updateField(field)
 			}
 		}
 	}
+}
+
+/*
+ * Will flip a coordinate which belongs to a 2-dimensional array so that it is the coordinate if
+ * this array were upside-down. Takes a json coordinate like {row:x,col:y} and the number of rows
+ * and columns in the array. Returns null if the coordinate data is null or out of bounds.
+ */
+function flipCoordinate(coordinate, numRows, numCols)
+{
+    if (coordinate == null || coordinate.row == null || coordinate.row >= numRows
+            || coordinate.col == null || coordinate.col >= numCols)
+    {
+        return null;
+    }
+
+    // arrays are 0 indexed
+    numRows -= 1;
+    numCols -= 1;
+
+    function flip(number, max)
+    {
+        return Math.abs(max - number);
+    }
+
+    var coord =
+    {
+        row : flip(coordinate.row, numRows),
+        col : flip(coordinate.col, numCols)
+    };
+
+    return coord;
+}
+
+/*
+ * Takes an arbitrary sized double-array and flips it upside down. Assumes that each second array is
+ * the same size.
+ */
+function flipField(field)
+{
+    if (field == null || field.length == 0)
+    {
+        return null;
+    }
+
+    var maxRow = field.length / 2;
+    if (field.length % 2 == 1)
+    {
+        maxRow++;
+    }
+
+    for (var row = 0; row < maxRow; row++)
+    {
+        for (var col = 0; col < field[row].length; col++)
+        {
+            var coord1 =
+            {
+                row : row,
+                col : col
+            };
+            var coord2 = flipCoordinate(coord1, field.length, field[row].length);
+            var temp = field[row][col];
+            field[row][col] = field[coord2.row][coord2.col];
+            field[coord2.row][coord2.col] = temp;
+        }
+    }
+    return field;
 }

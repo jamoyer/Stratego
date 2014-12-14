@@ -9,7 +9,7 @@
 {
 	line-height: normal;
 	font-size: 30px;
-	padding: 11px 15px 9px 15px;
+	padding: 6px 15px 9px 15px;
 }
 
 .navbar a,
@@ -44,17 +44,16 @@
 	width: 70px;
 	height: 70px;
 	padding: 4px;
-	border: 1px solid transparent;
-	/* background-image: url("../img/mariobros/1.jpg"); */
+	border: 1px solid black;
 	background-color: transparent;
 	background-repeat: no-repeat;
 	background-position: center center;
 	float:left;
 	position: relative;
-	
 }
 
-.tile:after
+.tile:after,
+.bankTile:after
 {
 	position: absolute;
 	left: 4px;
@@ -68,9 +67,41 @@
 	color: #777;
 }
 
+body #gameContainer.tile-obsticle
+{
+	border: 0px;
+}
+
+.tileRow:first-child .tile
+{
+	border-top: 0px;
+}
+
+.tileRow:last-child .tile
+{
+	border-bottom: 0px;
+}
+
+.tileRow .tile:first-child
+{
+	border-left: 0px;
+}
+
+body #gameContainer .tile-last
+{
+	border-right: 0px;
+}
+
+#gameContainer .panel-field
+{
+	background: transparent url("../img/bg.jpg") no-repeat center center;
+	background-size: 718px 718px;
+}
+
 #gameContainer #field
 {
 	padding: 9px;
+	
 }
 
 .tileRow
@@ -80,24 +111,37 @@
 
 .bankRow
 {
-	width: 680px;
+	width: 688px;
+}
+
+.bankSpacer
+{
+	float: left;
+	width: 338px;
+	height: 80px;
+	margin-right: 6px;
+	text-align: center;
+	padding-top: 20px;
 }
 
 .bankTile
 {
-	width: 60px;
-	height: 60px;
-	padding-right: 2px;
+	width: 80px;
+	height: 80px;
+	padding: 10px;
 	border: 0px;
-	background-color: green;
+	background-color: transparent;
 	background-repeat: no-repeat;
-	background-positon: center center;
-	float:left;
+	background-position: center center;
+	float: left;
+	position: relative;
+	margin-right: 6px;
+	margin-bottom: 6px;
 }
 
-.bankTile:last-child
+.bankRow .bankTile-last
 {
-	padding-right: 0px;
+	margin-right: 0px;
 }
 
 .tile-marshall:after
