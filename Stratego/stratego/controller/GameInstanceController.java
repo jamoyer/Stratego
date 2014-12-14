@@ -192,6 +192,7 @@ public class GameInstanceController
         // Hurray, both players have joined!
         // Create response so players can choose starting positions
         rspMsg.setGame(game, user);
+        rspMsg.setField(game.getFieldSymbolsByPlayer(user));
         logMsg(user + "'s game is all good to go, sending response.");
         rspMsg.setSuccessful(true);
         PlayerPosition userPos = game.getPlayerPosition(user);
