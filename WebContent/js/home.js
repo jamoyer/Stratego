@@ -54,6 +54,58 @@ function pingGameControl()
 }
 
 /*
+ * Gets highscores
+ */
+function pingHighScores()
+{
+    var xmlReq = new XMLHttpRequest();
+    xmlReq.open('POST', '/Stratego/Info', true);
+    xmlReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xmlReq.onreadystatechange = function()
+    {
+        if (xmlReq.readyState === 4)
+        {
+            // convert the responseText into JSON
+            var response = JSON.parse(xmlReq.responseText);
+
+            // display response for debugging purposes
+            if (response != null)
+            {
+            	alert(xmlReq.responseText);
+            }
+        }
+    }
+    xmlReq.send("actionType=getHighScores");
+    
+}
+
+/*
+ * Gets users logged in
+ */
+function pingOnlineUsers()
+{
+    var xmlReq = new XMLHttpRequest();
+    xmlReq.open('POST', '/Stratego/Info', true);
+    xmlReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xmlReq.onreadystatechange = function()
+    {
+        if (xmlReq.readyState === 4)
+        {
+            // convert the responseText into JSON
+            var response = JSON.parse(xmlReq.responseText);
+
+            // display response for debugging purposes
+            if (response != null)
+            {
+            	alert(xmlReq.responseText);
+            }
+        }
+    }
+    xmlReq.send("actionType=getCurrentUsers");
+    
+}
+
+/*
  * Calls GameControl and attempts to join the user to a new game.
  */
 function joinNewGame()

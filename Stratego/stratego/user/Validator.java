@@ -70,6 +70,7 @@ public class Validator extends HttpServlet
                 if (isSuccessful)
                 {
                     request.getSession().setAttribute("user", username);
+                    AppContext.putUser(username);
                 }
                 break;
             case "signup":
@@ -77,11 +78,14 @@ public class Validator extends HttpServlet
                 if (isSuccessful)
                 {
                     request.getSession().setAttribute("user", username);
+                    AppContext.putUser(username);
                 }
                 break;
             case "logout":
                 String user = (String) request.getSession().getAttribute("user");
+                AppContext.removeUser(user);
                 request.getSession().setAttribute("user", null);
+                
 
                 // need to end any games this user is in
                 GameInstance game = AppContext.getGame(user);

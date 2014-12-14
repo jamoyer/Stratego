@@ -197,6 +197,7 @@ public class GameControlThread extends Thread
                  * game due to time out. Also checks if the other user rage
                  * quit.
                  */
+                AppContext.putUser(user);
                 rspMsg.setPingResponse(true);
                 GameInstance gameToPing = AppContext.getGame(user);
                 if (gameToPing != null)
