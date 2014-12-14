@@ -1,5 +1,6 @@
 
 var bankSelected = false;
+var selectedFieldTile = null;
 /*
  * this will ping the game server every 5 seconds and refresh the response time
  */ 
@@ -125,6 +126,178 @@ function moveUnit()
     sendMoveRequest(source, destination);
 }
 
+/*
+ * Given the field and the coordinate of a unit to move like {row:x,col:y},
+ * this function returns an array of allowed move locations. The elements 
+ * of the array will be {row:x,col:y,isAttack:boolean}. isAttack will be 
+ * true if moving the unit to that spot would be an attack action. This 
+ * function returns null or an empty array if there are no allowed moves for 
+ * this coordinate.
+ */
+function getListOfAllowedMoves(field, coordinate)
+{
+    // make sure data is valid
+    if (field == null || coordinate == null || coordinate.row == null || coordinate.col == null
+            || coordinate.row >= field.length || coordinate.col >= field[0].length)
+    {
+        return null;
+    }
+
+    var type = getUnitTypeFromChar(field[coordinate.row][coordinate.col]);
+
+    // check if unit can be moved at all
+    if (type == null || type.name == "FLAG" || type.name == "OBSTACLE" || type.name == "EMPTY"
+            || type.name == "BOMB" || type.name.substring(0, 5) == "ENEMY")
+    {
+        return null;
+    }
+
+    function checkIfAllowedMove(row, col)
+    {
+        if (row < 0 || col < 0 || row >= field.length || col >= field[0].length)
+        {
+            return null;
+        }
+
+        var position = getUnitTypeFromChar(field[row][coordinate.col]);
+        var allowedMove = {};
+
+        if (position.name != "EMPTY" && position.name.substring(0, 5) != "ENEMY")
+        {
+            return null;
+        }
+        else if (position.name == "EMPTY")
+        {
+            allowedMove.isAttack = false;
+        }
+        else
+        {
+            allowedMove.isAttack = true;
+        }
+        allowedMove.row = row;
+        allowedMove.col = coordinate.col;
+        return allowedMove;
+    }
+
+    var allowedMoves = [];
+
+    if (type.name == "SCOUT")
+    {
+        // check down
+        for (var row = coordinate.row; row < field.length; row++)
+        {
+            var allowedMove = checkIfAllowedMove(row, coordinate.col);
+            if (allowedMove == null)
+            {
+                break;
+            }
+            allowedMoves.push(allowedMove);
+        }
+
+        // check up
+        for (var row = coordinate.row; row >= 0; row--)
+        {
+            var allowedMove = checkIfAllowedMove(row, coordinate.col);
+            if (allowedMove == null)
+            {
+                break;
+            }
+            allowedMoves.push(allowedMove);
+        }
+
+        // check left
+        for (var col = coordinate.col; col >= 0; col--)
+        {
+            var allowedMove = checkIfAllowedMove(coordinate.row, col);
+            if (allowedMove == null)
+            {
+                break;
+            }
+            allowedMoves.push(allowedMove);
+        }
+
+        // check right
+        for (var col = coordinate.col; col < field[0].length; col++)
+        {
+            var allowedMove = checkIfAllowedMove(coordinate.row, col);
+            if (allowedMove == null)
+            {
+                break;
+            }
+            allowedMoves.push(allowedMove);
+        }
+    }
+    else
+    {
+        var allowedMove = checkIfAllowedMove(coordinate.row + 1, coordinate.col);
+        if (allowedMove != null)
+        {
+            allowedMoves.push(allowedMove);
+        }
+        var allowedMove = checkIfAllowedMove(coordinate.row - 1, coordinate.col);
+        if (allowedMove != null)
+        {
+            allowedMoves.push(allowedMove);
+        }
+        var allowedMove = checkIfAllowedMove(coordinate.row, coordinate.col + 1);
+        if (allowedMove != null)
+        {
+            allowedMoves.push(allowedMove);
+        }
+        var allowedMove = checkIfAllowedMove(coordinate.row, coordinate.col - 1);
+        if (allowedMove != null)
+        {
+            allowedMoves.push(allowedMove);
+        }
+    }
+    return allowedMoves;
+}
+
+/*
+ * Sends the user's chosen starting positions to the GameControl. GameControl returns the inital
+ * 10x10 field to display.
+ */
+function setStartPositions(isTopPlayer)
+{
+    var startingField = [];
+    var count = 0;
+    var currentField = $(".tileRow");
+    $(currentField).each(function(row)
+    {
+        if (count >= 6)
+        {
+            var startingRow = [];
+            $(row).each(function(element)
+            {
+                var currentTileClass = $(element).attr('class').split(/\s+/)[1];
+                var currentTileType = currentTileClass.substring(5);
+                var symbol = getCharFromUnitType(currentTileType);
+                startingRow.push(symbol);
+            });
+            startingField.push(startingRow);
+        }
+        count++;
+    });
+
+    if (isTopPlayer)
+    {
+        startingField = flipField(startingField);
+    }
+
+    var theme = document.getElementById('theme').value;
+
+    var data =
+    {
+        actionType : "setPositions",
+        positions : JSON.stringify(startingField),
+        theme : theme
+    };
+
+    makeGameControlRequest(data);
+}
+
+
+
 function makeGameControlRequest(JSONObjectToSend)
 {
     var xmlReq = new XMLHttpRequest();
@@ -237,41 +410,89 @@ function makeGameControlRequest(JSONObjectToSend)
         				type: 'GET',
         				success: function(response) {
         					$("#container").html(response);
-        					updateField(data.field);
+        					//updateField(data.field);
+        					
+        					var totalCounter = 40;
+        					var counters = {}
+        					counters["flag"] = 1;
+        					counters["bomb"] = 6;
+        					counters["spy"] = 1;
+        					counters["marshall"] = 1;
+        					counters["general"] = 1;
+        					counters["colonel"] = 2;
+        					counters["major"] = 3;
+        					counters["captain"] = 4;
+        					counters["lieutenant"] = 4;
+        					counters["sergeant"] = 4;
+        					counters["miner"] = 5;
+        					counters["scout"] = 8;
+        					
         					$(".bankTile").on('click', function(e) {
-        						bankSelected = true;
-        						var type = $(this).attr('class')[0];
-        						$(this).css("border-color", "red");
-        						$(".tile").on('click', function(e) {
-        							var currentTileClass = $(this).attr('class').split(/\s+/)[1];
-        							var currentTileType = currentTileClass.substring(5);
-        							if (currentTileType == "empty")
-        							{
-	        							$(this).addClass(type);
-	        							$(".tile").unbind('click');
-	        							bankSelected = false;
-        							}
-        						});
-        					});
-        					$(".tile").on('click', function(e) {
-        						if (!bankSelected)
+        						if (selectedFieldTile == null)
         						{
-        							var currentTileClass = $(this).attr('class').split(/\s+/)[1];
-        							var currentTileType = currentTileClass.substring(5);
-        							
-	        						var type = $(this).attr('class')[0];
-	        						$(this).css("border-color", "red");
-	        						$(".tile").on('click', function(e) {
-	        							var currentTileClass = $(this).attr('class').split(/\s+/)[1];
-	        							var currentTileType = currentTileClass.substring(5);
-	        							if (currentTileType == "empty")
-	        							{
-		        							$(this).addClass(type);
-		        							$(".tile").unbind('click');
-	        							}
-	        						});
+	        						bankSelected = true;
+	        						var selectedTile = this;
+	        						var selectedTileClass = $(selectedTile).attr('class').split(/\s+/)[1];
+	    							var selectedTileType = selectedTileClass.substring(5);
+	    							if (counters[selectedTileType] > 0)
+	    							{
+		        						$(this).css("border-color", "red");
+		        						$(".tile").on('click.bankToField', function(e) {
+		        							var currentTile = this;
+		        							if ($(currentTile).parent().index() > 5)
+		        							{
+			        							var currentTileClass = $(currentTile).attr('class').split(/\s+/)[1];
+			        							var currentTileType = currentTileClass.substring(5);
+			        							if(currentTileType == "empty" && currentTileType != "enemy_covered" && currentTileType != "obstacle")
+			        							{
+			        								$(this).removeClass("tile-empty");
+				        							$(this).addClass("tile-" + selectedTileType);
+				        							counters[selectedTileType]--;
+				        							if (counters[selectedTileType] == 0)
+				        							{
+				        								selectedTile = $(selectedTile).remove();
+				        							}
+				        							$(".tile").off('click.bankToField');
+				        							bankSelected = false;
+			        							}
+		        							}
+		        						});
+	    							}
         						}
         					});
+        					
+        					$(".tile").on('click.fieldToField', fieldToField);		
+        					function fieldToField()
+        					{
+        						if (!bankSelected)
+        						{
+        							var currentTile = this;
+        							var currentTileClass = $(currentTile).attr('class').split(/\s+/)[1];
+        							var currentTileType = currentTileClass.substring(5);
+        							if (selectedFieldTile == null)
+        							{
+	        							if (currentTileType != "empty" && currentTileType != "enemy_covered" && currentTileType != "obstacle")
+	        							{
+	        								$(this).css("border-color", "red");
+	        								selectedFieldTile = currentTile;
+	        							}
+        							} else
+        							{
+            							if (currentTileType == "empty" && $(currentTile).parent().index() > 5)
+            							{
+            								var selectedFieldTileClass = $(selectedFieldTile).attr('class').split(/\s+/)[1];
+                							var selectedFieldTileType = selectedFieldTileClass.substring(5);
+            								$(this).removeClass("tile-empty");
+                							$(this).addClass("tile-" + selectedFieldTileType);
+                							
+                							$(selectedFieldTile).css("border-color", "transparent");
+                							$(selectedFieldTile).removeClass("tile-" + selectedFieldTileType);
+                							$(selectedFieldTile).addClass("tile-empty");
+                							selectedFieldTile = null;
+            							}
+        							}
+        						}
+        					}
         				}
         			});
             	} else {

@@ -45,12 +45,27 @@
 	height: 70px;
 	padding: 4px;
 	border: 1px solid transparent;
-	background-image: url("../img/mariobros/1.jpg");
+	/* background-image: url("../img/mariobros/1.jpg"); */
 	background-color: transparent;
 	background-repeat: no-repeat;
 	background-position: center center;
 	float:left;
 	position: relative;
+	
+}
+
+.tile:after
+{
+	position: absolute;
+	left: 4px;
+	bottom: 4px;
+	background-color: #e7e7e7;
+	-webkit-border-top-right-radius: 2px;
+	-moz-border-radius-topright: 2px;
+	border-top-right-radius: 2px;
+	padding: 0 4px;
+	font-weight: bold;
+	color: #777;
 }
 
 #gameContainer #field
@@ -85,18 +100,68 @@
 	padding-right: 0px;
 }
 
-.tile-empty:after
+.tile-marshall:after
+{
+	content: "1";
+
+}
+
+.tile-general:after
+{
+	content: "2";
+}
+
+.tile-colonel:after
+{
+	content: "3";
+}
+
+.tile-major:after
+{
+	content: "4";
+}
+
+.tile-captain:after
+{
+	content: "5";
+}
+
+.tile-lieutenant:after
+{
+	content: "6";
+}
+
+.tile-sergeant:after
+{
+	content: "7";
+}
+
+.tile-miner:after
+{
+	content: "8";
+}
+
+.tile-scout:after
 {
 	content: "9";
-	position: absolute;
-	left: 4px;
-	bottom: 4px;
-	background-color: #e7e7e7;
-	-webkit-border-top-right-radius: 2px;
-	-moz-border-radius-topright: 2px;
-	border-top-right-radius: 2px;
-	padding: 0 4px;
-	font-weight: bold;
-	color: #777;
-	
+}
+
+.tile-bomb:after
+{
+	content: "B";
+}
+
+.tile-spy:after
+{
+	content: "S";
+}
+
+.tile-flag:after
+{
+	content: "F";
+}
+
+.tile-enemy_covered:after
+{
+	content: "E";
 }

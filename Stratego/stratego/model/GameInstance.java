@@ -128,7 +128,7 @@ public class GameInstance
     public void setPlayerTheme(final PlayerPosition userPos, String theme)
     {
         String theTheme = "classic";
-        File file = new File("../Stratego/WebContent/img/");
+        File file = new File("/Users/michaeldmead/workspace/Stratego/WebContent/img/");
         if (file != null)
         {
             String[] names = file.list();
@@ -137,7 +137,7 @@ public class GameInstance
                 for (String name : names)
                 {
                     logMsg("folder " + name);
-                    if (new File("../Stratego/WebContent/img/" + name).isDirectory() && name.equals(theme))
+                    if (new File("/Users/michaeldmead/workspace/Stratego/WebContent/img/" + name).isDirectory() && name.equals(theme))
                     {
                         theTheme = name;
                         break;

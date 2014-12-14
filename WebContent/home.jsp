@@ -2,7 +2,8 @@
 <%@ page
     import="org.apache.commons.lang3.StringEscapeUtils,
             stratego.model.TileSymbol, 
-            stratego.model.UnitType;"
+            stratego.model.UnitType,
+           java.io.File"
 %>
 <%
     String sessionUser = (String) session.getAttribute("user");
@@ -20,6 +21,88 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/main.css" />
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/home.css" />
+	<style>
+	<%
+		File file = new File("/Users/michaeldmead/workspace/Stratego/WebContent/img/");
+		if (file != null)
+		{
+		    String[] themes = file.list();
+		    if (themes != null)
+		    {
+		        for (String theme : themes)
+		        {
+		        	out.write("."+theme+" .tile-marshall\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/1.jpg\")\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-general\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/2.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-colonel\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/3.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-major\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/4.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-captain\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/5.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-lieutenant\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/6.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-sergeant\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/7.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-miner\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/8.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-scout\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/9.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-spy\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/spy.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-bomb\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/bomb.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-flag\n");
+		        	out.write("{\n");
+		        	out.write("background-image: url(\"img/"+theme+"/flag.jpg\");\n");
+		        	out.write("}\n");
+		        	
+		        	out.write("."+theme+" .tile-enemy_covered\n");
+		        	out.write("{\n");
+	
+		        	out.write("background-image: url(\"img/"+theme+"/cover.jpg\");\n");
+		        	out.write("}\n");
+		            
+		        }
+		    }
+		}
+	
+	%>
+	</style>
 	<script src="/Stratego/js/jquery.min.js"></script>
 	<script src="/Stratego/js/jquery-ui.min.js"></script>
 	<script src="/Stratego/js/bootstrap.min.js"></script>
@@ -49,6 +132,20 @@
 		    }
 		    return tileType;
 		}
+		
+		function getCharFromUnitType(type)
+	    {
+	        switch (type)
+	        {
+	            <%for (TileSymbol tile : TileSymbol.values())
+	            {%>
+	            case "<%out.print(tile.name());%>":
+	                return "<%out.print(tile.getSymbol());%>";
+	            <%}%>
+	            default:
+	                return null;
+	        }
+	    }
 	</script>
 	<script src="/Stratego/js/home.js"></script>
 </head>
