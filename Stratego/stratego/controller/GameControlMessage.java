@@ -25,6 +25,7 @@ public class GameControlMessage extends ResponseMessage
     private PlayerPosition turn = null;
     private GameInstance game = null;
     private String opponentTheme = null;
+    private boolean isReveal = false;
 
     public GameControlMessage()
     {
@@ -43,6 +44,7 @@ public class GameControlMessage extends ResponseMessage
             message.put("isSuccessful", isSuccessful);
             message.put("logMsg", logMsg);
             message.put("field", field);
+            message.put("isReveal", isReveal);
             if (game != null)
             {
                 message.put("playerNum", GameControlMessage.convertPlayerPosToPlayerNum(position));
@@ -68,6 +70,11 @@ public class GameControlMessage extends ResponseMessage
             e.printStackTrace();
         }
         return message.toString();
+    }
+    
+    public void setIsReveal(boolean isReveal)
+    {
+        this.isReveal = isReveal;
     }
 
     public void setPingResponse(boolean isPingResponse)

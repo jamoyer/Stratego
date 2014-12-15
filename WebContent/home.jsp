@@ -23,7 +23,7 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/home.css" />
 	<style>
 	<%
-		File file = new File("/Users/michaeldmead/workspace/Stratego/WebContent/img/");
+		File file = new File("../workspace/Stratego/WebContent/img/");
 		if (file != null)
 		{
 		    String[] themes = file.list();
@@ -31,56 +31,32 @@
 		    {
 		        for (String theme : themes)
 		        {
-		        	out.write("."+theme+" .tile-marshall\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/1.jpg\")\n");
-		        	out.write("}\n");
+                    for (UnitType unit : UnitType.values())
+                    {
+                        if(unit!= UnitType.SPY)
+                        {
+                        out.write("."+theme+" .tile-"+unit.toString().toLowerCase()+"\n");
+                        out.write("{\n");
+                        out.write("background-image: url(\"img/"+theme+"/"+unit.getRank()+".jpg\")\n");
+                        out.write("}\n");
+                        
+                        out.write("."+theme+" .tile-enemy_"+unit.toString().toLowerCase()+"\n");
+                        out.write("{\n");
+                        out.write("background-image: url(\"img/"+theme+"/"+unit.getRank()+".jpg\")\n");
+                        out.write("}\n");
+                        }
+                    }
 		        	
-		        	out.write("."+theme+" .tile-general\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/2.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-colonel\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/3.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-major\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/4.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-captain\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/5.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-lieutenant\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/6.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-sergeant\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/7.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-miner\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/8.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-scout\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/9.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-spy\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/spy.jpg\");\n");
-		        	out.write("}\n");
-		        	
+                    out.write("."+theme+" .tile-spy\n");
+                    out.write("{\n");
+                    out.write("background-image: url(\"img/"+theme+"/spy.jpg\");\n");
+                    out.write("}\n");
+                    
+                    out.write("."+theme+" .tile-enemy_spy\n");
+                    out.write("{\n");
+                    out.write("background-image: url(\"img/"+theme+"/spy.jpg\");\n");
+                    out.write("}\n");
+                    
 		        	out.write("."+theme+" .tile-bomb\n");
 		        	out.write("{\n");
 		        	out.write("background-image: url(\"img/"+theme+"/bomb.jpg\");\n");
@@ -90,10 +66,19 @@
 		        	out.write("{\n");
 		        	out.write("background-image: url(\"img/"+theme+"/flag.jpg\");\n");
 		        	out.write("}\n");
+                    
+                    out.write("."+theme+" .tile-enemy_bomb\n");
+                    out.write("{\n");
+                    out.write("background-image: url(\"img/"+theme+"/bomb.jpg\");\n");
+                    out.write("}\n");
+                    
+                    out.write("."+theme+" .tile-enemy_flag\n");
+                    out.write("{\n");
+                    out.write("background-image: url(\"img/"+theme+"/flag.jpg\");\n");
+                    out.write("}\n");
 		        	
 		        	out.write("."+theme+" .tile-enemy_covered\n");
 		        	out.write("{\n");
-	
 		        	out.write("background-image: url(\"img/"+theme+"/cover.jpg\");\n");
 		        	out.write("}\n");
 		            

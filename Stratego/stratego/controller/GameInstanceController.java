@@ -35,7 +35,7 @@ public class GameInstanceController
 
         // end games that have met their time limit
         Thread gameModerator = new Thread(new GameModerator());
-        //gameModerator.start();
+        // gameModerator.start();
     }
 
     /**
@@ -446,10 +446,12 @@ public class GameInstanceController
                 rspMsg.setSuccessful(true);
                 rspMsg.setField(revealGrid);
                 rspMsg.setTurn(game.getTurn());
+                rspMsg.setIsReveal(true);
 
                 // prints the json response message
                 output.print(rspMsg.getMessage());
                 output.flush();
+                rspMsg.setIsReveal(false);
                 game.setBattleRevealGrid(null);
             }
         }
@@ -525,10 +527,12 @@ public class GameInstanceController
             revealGrid[destination.getRow()][destination.getColumn()] = game.getField().getUnitAt(destination)
                     .getEnemyType().getSymbol();
             rspMsg.setField(revealGrid);
+            rspMsg.setIsReveal(true);
 
             // prints the json response message
             output.print(rspMsg.getMessage());
             output.flush();
+            rspMsg.setIsReveal(false);
 
             // reveal the units to the opponent
             revealGrid = game.getFieldSymbolsByPlayer(game.getOpponent(userPos));
