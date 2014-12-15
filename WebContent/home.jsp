@@ -23,7 +23,7 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/home.css" />
 	<style>
 	<%
-		File file = new File("../workspace/Stratego/WebContent/img/");
+		File file = new File("/Users/michaeldmead/workspace/Stratego/WebContent/img/");
 		if (file != null)
 		{
 		    String[] themes = file.list();
@@ -135,7 +135,7 @@
 	<script src="/Stratego/js/home.js"></script>
 </head>
 <body>
-<p id="serverResponse"></p>
+<!-- <p id="serverResponse"></p> -->
 <div class="container">
 	<!-- Static navbar -->
 	<div class="navbar navbar-default" role="navigation">

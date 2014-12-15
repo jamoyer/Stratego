@@ -35,7 +35,7 @@ public class GameInstanceController
 
         // end games that have met their time limit
         Thread gameModerator = new Thread(new GameModerator());
-        // gameModerator.start();
+        gameModerator.start();
     }
 
     /**

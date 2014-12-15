@@ -1,8 +1,10 @@
 
 var bankSelected = false;
 var selectedFieldTile = null;
+var highlightedLocations = null;
 var playerNumber = null;
 var gameStarted = false;
+var revealing = false;
 /*
  * this will ping the game server every 5 seconds and refresh the response time
  */ 
@@ -49,7 +51,7 @@ function pingGameControl()
             // display response for debugging purposes
             if (response.field != null)
             {
-                $("#serverResponse").text(JSON.stringify(response));
+                //$("#serverResponse").text(JSON.stringify(response));
             }
         }
     }
@@ -139,7 +141,7 @@ function getListOfAllowedMoves(field, coordinate)
             return null;
         }
 
-        var position = getUnitTypeFromChar(field[row][coordinate.col]);
+        var position = getUnitTypeFromChar(field[row][col]);
         var allowedMove = {};
 
         if (position.name != "EMPTY" && position.name.substring(0, 5) != "ENEMY")
@@ -155,7 +157,7 @@ function getListOfAllowedMoves(field, coordinate)
             allowedMove.isAttack = true;
         }
         allowedMove.row = row;
-        allowedMove.col = coordinate.col;
+        allowedMove.col = col;
         return allowedMove;
     }
 
@@ -303,26 +305,53 @@ function makeGameControlRequest(JSONObjectToSend)
             }
             return responseArray;
         }
-/*        
-        if (xmlReq.readyState === 1)
-        {
-        	if (JSONObjectToSend["actionType"] == "setPositions") {
-        		$("#gameContainer").prepend('<button id="waitingBanner" disabled="disabled" class="btn btn-lg btn-warning"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Waiting for Opponent...</button>');
-        	}
-        }
-*/
+
         if (xmlReq.readyState === 3)
         {
             // convert the responseText into JSON
             var data = parseGameControlResponse(xmlReq.responseText);
 
             // display response for debugging purposes\
-            $("#serverResponse").text(JSON.stringify(data));
+            //$("#serverResponse").text(JSON.stringify(data));
             
             if (JSONObjectToSend["actionType"] == "moveUnit" || JSONObjectToSend["actionType"] == "setPositions" || gameStarted) {
-            	
             	data = data[data.length - 1];
-            	setPositionsResponse(data);
+            	
+            	if (data.gameWon)
+            	{
+            		alert("you win!");
+            		$.ajax({
+            			url: '/Stratego/html/newGame.html',
+            			type: 'GET',
+            			success: function(data) {
+            				$("#container").html(data);
+            			}
+            		});
+            	}
+            	
+            	if (data.gameWon)
+            	{
+            		alert("you lose!");
+            		$.ajax({
+            			url: '/Stratego/html/newGame.html',
+            			type: 'GET',
+            			success: function(data) {
+            				$("#container").html(data);
+            			}
+            		});
+            	}
+            	
+            	if (revealing)
+            	{	
+            		setTimeout(function() {
+            			setPositionsResponse(data);
+            		}, 3000);
+            	}
+            	else
+            	{	
+            		setPositionsResponse(data);
+            	}
+            	revealing = data.isReveal;
             }
         }
         if (xmlReq.readyState === 4)
@@ -331,7 +360,7 @@ function makeGameControlRequest(JSONObjectToSend)
             var data = parseGameControlResponse(xmlReq.responseText);
 
             // display response for debugging purposes
-            $("#serverResponse").text(JSON.stringify(data));
+            //$("#serverResponse").text(JSON.stringify(data));
 
             if (JSONObjectToSend["actionType"] == "newGame") {
             	data = data[0];
@@ -436,6 +465,7 @@ function makeGameControlRequest(JSONObjectToSend)
         							$(".bankTile").off('click');
         							setStartPositions(isTopPlayer);
         							$("#gameContainer").prepend('<button id="waitingBanner" disabled="disabled" class="btn btn-lg btn-warning"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Waiting for Opponent...</button>');	
+        							$(".panel-bank").remove();
         						} else
         						{
         							alert("You must place all units");
@@ -465,46 +495,67 @@ function setPositionsResponse(data) {
 		{
 			data.field = flipField(data.field);
 		}
-		updateField(data.field);
 		
-		if(data.playerNum == data.currentTurn)
+		updateField(data.field);
+		if(data.playerNum == data.currentTurn && !data.isReveal)
 		{
 			$("#waitingBanner").remove();
 			$(".tile").on('click.moveUnit', function() {
 				var clickedTile = this;
+				var clickedTileClass = $(clickedTile).attr('class').split(/\s+/)[1];
+				var clickedTileType = clickedTileClass.substring(5);
+				
 				var coordinate = {};
 				coordinate["col"] = $(clickedTile).index();
 				coordinate["row"] = $(clickedTile).parent().index();
 				
 				if (selectedFieldTile == null)
 				{
-					var allowedDestinations = getListOfAllowedMoves(data.field, coordinate);
-					for(var i = 0; i < allowedDestinations.length; i++)
+					if (clickedTileType != "empty" && clickedTileType != "enemy_covered" && clickedTileType != "obstacle")
 					{
-						var destination = allowedDestinations[i];
-						var destRow = $(".tileRow")[destination["row"]];
-						var destTile = $(destRow).children(".tile")[destination["col"]];
-						if (destination.isAttack)
-							$(destTile).css("border-color","red");
-						else
-							$(destTile).css("border-color","green");
-					}
-					selectedFieldTile = clickedTile;
+						highlightedLocations = getListOfAllowedMoves(data.field, coordinate);
+						for(var i = 0; i < highlightedLocations.length; i++)
+						{
+							var destination = highlightedLocations[i];
+							var destRow = $(".tileRow")[destination["row"]];
+							var destTile = $(destRow).children(".tile")[destination["col"]];
+							if (destination.isAttack)
+								$(destTile).css("border-color","red");
+							else
+								$(destTile).css("border-color","green");
+						}
+						selectedFieldTile = clickedTile;
+					} else
+						alert("You can only move your own units");
 				} else {
-					$(".tile").off('click');
-					var precedingCoordinate = {};
-					precedingCoordinate["col"] = $(selectedFieldTile).index();
-					precedingCoordinate["row"] = $(selectedFieldTile).parent().index();
-					selectedFieldTile = null;
-					if (data.playerNum == 2)
+					if (clickedTileType == "empty" || clickedTileType == "enemy_covered")
 					{
-						//data.field = flipField(data.field);
-						var flipPredCoord = flipCoordinate(precedingCoordinate, data.field.length, data.field[0].length);
-						var flipDestCoord = flipCoordinate(coordinate, data.field.length, data.field[0].length);
-						sendMoveRequest(flipPredCoord, flipDestCoord);
-					} else {
-						sendMoveRequest(precedingCoordinate, coordinate);
-					}
+						$(".tile").off('click');
+						
+						for(var i = 0; i < highlightedLocations.length; i++)
+						{
+							var destination = highlightedLocations[i];
+							var destRow = $(".tileRow")[destination["row"]];
+							var destTile = $(destRow).children(".tile")[destination["col"]];
+							$(destTile).css("border-color","black");
+						}
+						highlightedLocations = null;
+						
+						var precedingCoordinate = {};
+						precedingCoordinate["col"] = $(selectedFieldTile).index();
+						precedingCoordinate["row"] = $(selectedFieldTile).parent().index();
+						selectedFieldTile = null;
+						if (data.playerNum == 2)
+						{
+							//data.field = flipField(data.field);
+							var flipPredCoord = flipCoordinate(precedingCoordinate, data.field.length, data.field[0].length);
+							var flipDestCoord = flipCoordinate(coordinate, data.field.length, data.field[0].length);
+							sendMoveRequest(flipPredCoord, flipDestCoord);
+						} else {
+							sendMoveRequest(precedingCoordinate, coordinate);
+						}
+					} else
+						alert("You can only move to an empty tile or attack");
 				}
 			});
 		} else

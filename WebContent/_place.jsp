@@ -13,7 +13,7 @@
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
-				<div class="tile tile-enemy_covered tile-last"></div>
+				<div class="tile tile-enemy_covered" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -26,7 +26,7 @@
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
-				<div class="tile tile-enemy_covered tile-last"></div>
+				<div class="tile tile-enemy_covered" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -39,7 +39,7 @@
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
-				<div class="tile tile-enemy_covered tile-last"></div>
+				<div class="tile tile-enemy_covered" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -52,7 +52,7 @@
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
 				<div class="tile tile-enemy_covered"></div>
-				<div class="tile tile-enemy_covered tile-last"></div>
+				<div class="tile tile-enemy_covered" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -65,7 +65,7 @@
 				<div class="tile tile-empty"></div>
 				<div class="tile tile-empty"></div>
 				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty tile-last"></div>
+				<div class="tile tile-empty" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -78,10 +78,11 @@
 				<div class="tile tile-empty"></div>
 				<div class="tile tile-empty"></div>
 				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty tile-last"></div>
+				<div class="tile tile-empty" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
-		
+			<!-- 
+			//TEST CODE
 			<div class="tileRow">
 				<div class="tile tile-captain"></div>
 				<div class="tile tile-sergeant"></div>
@@ -92,7 +93,7 @@
 				<div class="tile tile-bomb"></div>
 				<div class="tile tile-lieutenant"></div>
 				<div class="tile tile-sergeant"></div>
-				<div class="tile tile-captain tile-last"></div>
+				<div class="tile tile-captain" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -105,7 +106,7 @@
 				<div class="tile tile-bomb"></div>
 				<div class="tile tile-miner"></div>
 				<div class="tile tile-miner"></div>
-				<div class="tile tile-lieutenant tile-last"></div>
+				<div class="tile tile-lieutenant" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -118,7 +119,7 @@
 				<div class="tile tile-bomb"></div>
 				<div class="tile tile-scout"></div>
 				<div class="tile tile-scout"></div>
-				<div class="tile tile-captain tile-last"></div>
+				<div class="tile tile-captain" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			<div class="tileRow">
@@ -131,64 +132,62 @@
 				<div class="tile tile-scout"></div>
 				<div class="tile tile-scout"></div>
 				<div class="tile tile-scout"></div>
-				<div class="tile tile-lieutenant tile-last"></div>
-				<div class="clear"></div>
-			</div>
-			
-			<!--
-			<div class="tileRow">
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="clear"></div>
-			</div>
-			<div class="tileRow">
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="clear"></div>
-			</div>
-			<div class="tileRow">
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="clear"></div>
-			</div>
-			<div class="tileRow">
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
-				<div class="tile tile-empty"></div>
+				<div class="tile tile-lieutenant" style="border-right:0"></div>
 				<div class="clear"></div>
 			</div>
 			-->
+			<div class="tileRow">
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="clear"></div>
+			</div>
+			<div class="tileRow">
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="clear"></div>
+			</div>
+			<div class="tileRow">
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="clear"></div>
+			</div>
+			<div class="tileRow">
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="tile tile-empty"></div>
+				<div class="clear"></div>
+			</div>
 		</div>
 	</div>
 	
