@@ -185,9 +185,9 @@
 <li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Info <span class="caret"></span></a>
 						<ul class="dropdown-menu" role="menu">
-                            <li><a id="HighScoresModal" data-toggle="modal" data-target="#HighScoreModal">High Scores</a></li>
-					        <li><a id="UserModal" data-toggle="modal" data-target="#UsersModal">Online Users</a></li>
-					        <li><a id="AboutModalButton" data-toggle="modal" data-target="#AboutModal">About</a></li>
+                    <li><a id="HighScoresModal" data-toggle="modal" data-target="#HighScoreModal">High Scores</a></li>
+					<li><a id="UserModal" data-toggle="modal" data-target="#UsersModal">Online Users</a></li>
+					<li><a id="AboutModalButton" data-toggle="modal" data-target="#AboutModal">About</a></li>
 						</ul>
 					</li>
 
