@@ -160,15 +160,27 @@
 							<li><a href="#" id="expert" >Expert</a></li>
 						</ul>
 					</li>
+					-->
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Theme <span class="caret"></span></a>
-						<ul class="dropdown-menu" role="menu">
-							<li><a href="#" id="normalMode">Normal</a></li>
-							<li><a href="#" id="batmanMode">Batman</a></li>
-							<li><a href="#" id="sharkMode">Shark</a></li>
+						<ul class="dropdown-menu" role="menu" id="selectTheme">
+							<%
+								if (file != null)
+								{
+								    String[] themes = file.list();
+								    if (themes != null)
+								    {
+								        for (String theme : themes)
+								        {
+								        	if (theme.indexOf('.') == -1)
+								        		out.println("<li><a href=\"#\">" + theme + "</a></li>");
+								        }
+								    }
+								}
+							%>
 						</ul>
 					</li>
-					 -->
+					 
 					<li><a id="AboutModalButton" data-toggle="modal" data-target="#AboutModal">High Scores</a></li>
 					<li><a id="AboutModalButton" data-toggle="modal" data-target="#AboutModal">About</a></li>
 				</ul>
@@ -234,6 +246,12 @@ $(document).ready()
 				alert("An error has occurred");
 			}
 		});
+	});
+	
+	$("#selectTheme li").on('click', function(e) {
+		var clickedTheme = $(this).children("a")[0].text;
+		$("#gameContainer").removeClass();
+		$("#gameContainer").addClass(clickedTheme);
 	});
 }
 </script>
