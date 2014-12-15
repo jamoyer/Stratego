@@ -23,7 +23,7 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/home.css" />
 	<style>
 	<%
-		File file = new File("/Users/michaeldmead/workspace/Stratego/WebContent/img/");
+		File file = new File("/usr/share/tomcat/webapps/Stratego/WebContent/img/");
 		if (file != null)
 		{
 		    String[] themes = file.list();
