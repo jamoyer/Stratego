@@ -23,7 +23,9 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/home.css" />
 	<style>
 	<%
-		File file = new File("/usr/share/tomcat/webapps/Stratego/WebContent/img/");
+		// path on server : "/usr/share/tomcat/webapps/Stratego/img/"
+		// path on other machines : "/usr/share/tomcat/webapps/Stratego/WebContent/img/"
+		File file = new File("/usr/share/tomcat/webapps/Stratego/img/");
 		if (file != null)
 		{
 		    String[] themes = file.list();
