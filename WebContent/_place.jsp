@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="stratego.model.TileSymbol;"%>
-<div id="gameContainer" class="batman">
+<div id="gameContainer" class="classicclassic">
 	<div class="panel panel-default panel-field">
 		<div id="field" class="panel-body">
 			<div class="tileRow">

@@ -5,6 +5,7 @@ var highlightedLocations = null;
 var playerNumber = null;
 var gameStarted = false;
 var revealing = false;
+var opponentThemeSet = false;
 /*
  * this will ping the game server every 5 seconds and refresh the response time
  */ 
@@ -265,12 +266,18 @@ function setStartPositions(isTopPlayer)
     }
 
     //var theme = document.getElementById('theme').value;
-    var theme = "batman";
+    if (typeof myTheme === 'undefined')
+    {
+    	myTheme = "classic";
+    }
+    var theme = myTheme;
+    alert("mytheme alert: " + myTheme);
 
     var data =
     {
         actionType : "setPositions",
-        positions : JSON.stringify(startingField),
+        positions:"[[\"9\",\"9\",\"3\",\"3\",\"B\",\"9\",\"4\",\"7\",\"F\",\"B\"],[\"B\",\"6\",\"6\",\"8\",\"7\",\"S\",\"7\",\"9\",\"B\",\"9\"],[\"5\",\"5\",\"6\",\"6\",\"4\",\"B\",\"7\",\"1\",\"8\",\"9\"],[\"5\",\"5\",\"2\",\"9\",\"8\",\"4\",\"9\",\"8\",\"8\",\"B\"]]",
+        //positions : JSON.stringify(startingField),
         theme : theme
     };
 
@@ -317,6 +324,14 @@ function makeGameControlRequest(JSONObjectToSend)
             if (JSONObjectToSend["actionType"] == "moveUnit" || JSONObjectToSend["actionType"] == "setPositions" || gameStarted) {
             	data = data[data.length - 1];
             	
+            	if (opponentThemeSet == false)
+        		{
+            		$("#gameContainer").removeClass();
+            		$("#gameContainer").addClass(myTheme+data.opponentTheme);
+            		alert(myTheme+data.opponentTheme);
+            		opponentThemeSet = true;
+        		}
+            	
             	if (data.gameWon)
             	{
             		alert("you win!");
@@ -327,6 +342,7 @@ function makeGameControlRequest(JSONObjectToSend)
             				$("#container").html(data);
             			}
             		});
+            		opponentThemeSet = false;
             	}
             	
             	if (data.gameWon)
@@ -339,6 +355,7 @@ function makeGameControlRequest(JSONObjectToSend)
             				$("#container").html(data);
             			}
             		});
+            		opponentThemeSet = false;
             	}
             	
             	if (revealing)

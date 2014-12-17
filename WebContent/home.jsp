@@ -23,8 +23,6 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="/Stratego/css/home.css" />
 	<style>
 	<%
-		// path on server : "/usr/share/tomcat/webapps/Stratego/img/"
-		// path on other machines : "/usr/share/tomcat/webapps/Stratego/WebContent/img/"
 		File file = new File("/usr/share/tomcat/webapps/Stratego/img/");
 		if (file != null)
 		{
@@ -33,57 +31,60 @@
 		    {
 		        for (String theme : themes)
 		        {
-                    for (UnitType unit : UnitType.values())
-                    {
-                        if(unit!= UnitType.SPY)
-                        {
-                        out.write("."+theme+" .tile-"+unit.toString().toLowerCase()+"\n");
-                        out.write("{\n");
-                        out.write("background-image: url(\"img/"+theme+"/"+unit.getRank()+".jpg\")\n");
-                        out.write("}\n");
-                        
-                        out.write("."+theme+" .tile-enemy_"+unit.toString().toLowerCase()+"\n");
-                        out.write("{\n");
-                        out.write("background-image: url(\"img/"+theme+"/"+unit.getRank()+".jpg\")\n");
-                        out.write("}\n");
-                        }
-                    }
-		        	
-                    out.write("."+theme+" .tile-spy\n");
-                    out.write("{\n");
-                    out.write("background-image: url(\"img/"+theme+"/spy.jpg\");\n");
-                    out.write("}\n");
-                    
-                    out.write("."+theme+" .tile-enemy_spy\n");
-                    out.write("{\n");
-                    out.write("background-image: url(\"img/"+theme+"/spy.jpg\");\n");
-                    out.write("}\n");
-                    
-		        	out.write("."+theme+" .tile-bomb\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/bomb.jpg\");\n");
-		        	out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-flag\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/flag.jpg\");\n");
-		        	out.write("}\n");
-                    
-                    out.write("."+theme+" .tile-enemy_bomb\n");
-                    out.write("{\n");
-                    out.write("background-image: url(\"img/"+theme+"/bomb.jpg\");\n");
-                    out.write("}\n");
-                    
-                    out.write("."+theme+" .tile-enemy_flag\n");
-                    out.write("{\n");
-                    out.write("background-image: url(\"img/"+theme+"/flag.jpg\");\n");
-                    out.write("}\n");
-		        	
-		        	out.write("."+theme+" .tile-enemy_covered\n");
-		        	out.write("{\n");
-		        	out.write("background-image: url(\"img/"+theme+"/cover.jpg\");\n");
-		        	out.write("}\n");
-		            
+			        for (String enemyTheme : themes)
+			        {
+	                    for (UnitType unit : UnitType.values())
+	                    {
+	                        if(unit!= UnitType.SPY)
+	                        {
+	                        out.write("."+theme+enemyTheme+" .tile-"+unit.toString().toLowerCase()+"\n");
+	                        out.write("{\n");
+	                        out.write("background-image: url(\"img/"+theme+"/"+unit.getRank()+".jpg\")\n");
+	                        out.write("}\n");
+	                        
+	                        out.write("."+theme+enemyTheme+" .tile-enemy_"+unit.toString().toLowerCase()+"\n");
+	                        out.write("{\n");
+	                        out.write("background-image: url(\"img/"+enemyTheme+"/"+unit.getRank()+".jpg\")\n");
+	                        out.write("}\n");
+	                        }
+	                    }
+			        	
+	                    out.write("."+theme+enemyTheme+" .tile-spy\n");
+	                    out.write("{\n");
+	                    out.write("background-image: url(\"img/"+theme+"/spy.jpg\");\n");
+	                    out.write("}\n");
+	                    
+	                    out.write("."+theme+enemyTheme+" .tile-enemy_spy\n");
+	                    out.write("{\n");
+	                    out.write("background-image: url(\"img/"+enemyTheme+"/spy.jpg\");\n");
+	                    out.write("}\n");
+	                    
+			        	out.write("."+theme+enemyTheme+" .tile-bomb\n");
+			        	out.write("{\n");
+			        	out.write("background-image: url(\"img/"+theme+"/bomb.jpg\");\n");
+			        	out.write("}\n");
+			        	
+			        	out.write("."+theme+enemyTheme+" .tile-flag\n");
+			        	out.write("{\n");
+			        	out.write("background-image: url(\"img/"+theme+"/flag.jpg\");\n");
+			        	out.write("}\n");
+	                    
+	                    out.write("."+theme+enemyTheme+" .tile-enemy_bomb\n");
+	                    out.write("{\n");
+	                    out.write("background-image: url(\"img/"+enemyTheme+"/bomb.jpg\");\n");
+	                    out.write("}\n");
+	                    
+	                    out.write("."+theme+enemyTheme+" .tile-enemy_flag\n");
+	                    out.write("{\n");
+	                    out.write("background-image: url(\"img/"+enemyTheme+"/flag.jpg\");\n");
+	                    out.write("}\n");
+			        	
+			        	out.write("."+theme+enemyTheme+" .tile-enemy_covered\n");
+			        	out.write("{\n");
+			        	out.write("background-image: url(\"img/"+enemyTheme+"/cover.jpg\");\n");
+			        	out.write("}\n");
+			            
+			        }
 		        }
 		    }
 		}
@@ -290,9 +291,13 @@ $(document).ready()
 	});
 	
 	$("#selectTheme li").on('click', function(e) {
-		var clickedTheme = $(this).children("a")[0].text;
-		$("#gameContainer").removeClass();
-		$("#gameContainer").addClass(clickedTheme);
+		if (opponentThemeSet == false)
+		{
+			var clickedTheme = $(this).children("a")[0].text;
+			myTheme = clickedTheme;
+			$("#gameContainer").removeClass();
+			$("#gameContainer").addClass(clickedTheme+"classic");	
+		}
 	});
 
 $('#HighScoresModal').on('click', function(e) {
