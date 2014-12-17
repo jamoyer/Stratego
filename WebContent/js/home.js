@@ -271,7 +271,6 @@ function setStartPositions(isTopPlayer)
     	myTheme = "classic";
     }
     var theme = myTheme;
-    alert("mytheme alert: " + myTheme);
 
     var data =
     {
